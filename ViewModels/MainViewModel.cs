@@ -1,0 +1,17 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Win32;
+
+namespace MZResourceManager.ViewModels;
+
+public partial class MainViewModel : ObservableObject
+{
+    [RelayCommand]
+    private void OpenProject()
+    {
+        var dlg = new OpenFolderDialog { Title = "Select RPG Maker MZ Game Folder" };
+        if (dlg.ShowDialog() != true) return;
+
+        // TODO: Load project
+    }
+}

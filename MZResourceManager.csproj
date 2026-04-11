@@ -9,4 +9,7 @@
     <AssemblyName>MZResourceManager</AssemblyName>
     <LangVersion>12</LangVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+  </ItemGroup>
 </Project>
