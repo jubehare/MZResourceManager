@@ -22,6 +22,7 @@ public class DatabaseLoader
         progress?.Report("Loading system data…");
         var system = await LoadJsonAsync<MzSystem>(Path.Combine(dataDir, "System.json"), ct);
         db.GameTitle = system.GameTitle;
+        db.TileSize = system.Advanced.TileSize > 0 ? system.Advanced.TileSize : 48;
         db.Switches = BuildNamedList(system.Switches);
         db.Variables = BuildNamedList(system.Variables);
 

@@ -4,6 +4,7 @@ public class GameDatabase
 {
     public string GameFolder { get; set; } = string.Empty;
     public string GameTitle { get; set; } = string.Empty;
+    public int TileSize { get; set; } = 48;
 
     public List<NamedEntry> Items { get; set; } = [];
     public List<NamedEntry> Weapons { get; set; } = [];
