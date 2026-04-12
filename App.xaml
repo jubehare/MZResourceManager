@@ -19,6 +19,70 @@
                              Color="{StaticResource AppColorSide2}"/>
 
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+            <ControlTemplate x:Key="CtaBtn"
+                    TargetType="Button">
+                <Border x:Name="Bd"
+                        Background="{StaticResource AppColorMain2Brush}"
+                        CornerRadius="6"
+                        Padding="{TemplateBinding Padding}">
+                    <ContentPresenter HorizontalAlignment="Center"
+                            VerticalAlignment="Center"/>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver"
+                            Value="True">
+                        <Setter TargetName="Bd"
+                                Property="Background"
+                                Value="{StaticResource AppColorSide1Brush}"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed"
+                            Value="True">
+                        <Setter TargetName="Bd"
+                                Property="Background"
+                                Value="{StaticResource AppColorSide2Brush}"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+
+            <ControlTemplate x:Key="NavBtn"
+                    TargetType="Button">
+                <Border x:Name="Bd"
+                        Background="Transparent"
+                        CornerRadius="4"
+                        Padding="4,7">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{TemplateBinding Tag}"
+                                   Foreground="{StaticResource AppColorMain1Brush}"
+                                   FontSize="12"
+                                VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Content}"
+                                   Foreground="{StaticResource AppColorMain2Brush}"
+                                   FontSize="12"
+                                FontWeight="Bold"
+                                VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver"
+                            Value="True">
+                        <Setter TargetName="Bd"
+                                Property="Background"
+                                Value="{StaticResource AppColorSide1Brush}"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed"
+                            Value="True">
+                        <Setter TargetName="Bd"
+                                Property="Background"
+                                Value="{StaticResource AppColorMain2Brush}"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -29,6 +29,15 @@ public partial class MainViewModel : ObservableObject
     public bool ShowWelcome => !ProjectLoaded && !IsLoading;
 
     private GameDatabase? _db;
+    private readonly AppSettings _settings = SettingsService.Load();
+
+    public async Task TryAutoLoadAsync()
+    {
+        var folder = _settings.LastGameFolder;
+        if (string.IsNullOrEmpty(folder)) return;
+        if (ProjectValidator.GetValidationError(folder) != null) return;
+        await LoadProjectAsync(folder);
+    }
 
     [RelayCommand]
     private async Task OpenProjectAsync()
@@ -66,6 +75,8 @@ public partial class MainViewModel : ObservableObject
             VariableCount = _db.Variables.Count;
             CommonEventCount = _db.CommonEvents.Count;
 
+            _settings.LastGameFolder = folder;
+            SettingsService.Save(_settings);
             ProjectLoaded = true;
         }
         catch (Exception ex)

@@ -1,0 +1,28 @@
+<UserControl x:Class="MZResourceManager.Views.WelcomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+        <TextBlock Text="MZ Resource Manager"
+                   FontSize="34"
+                   FontWeight="Bold"
+                   Foreground="{StaticResource AppColorSide2Brush}"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,40"/>
+        <Button Content="Open Game Folder…"
+                Command="{Binding OpenProjectCommand}"
+                Template="{StaticResource CtaBtn}"
+                Foreground="White"
+                FontSize="14"
+                FontWeight="SemiBold"
+                Padding="40,13"
+                Cursor="Hand"
+                HorizontalAlignment="Center">
+            <Button.Effect>
+                <DropShadowEffect Color="{StaticResource AppColorSide2}"
+                                  Opacity="0.35"
+                                  BlurRadius="14"
+                                  ShadowDepth="3"/>
+            </Button.Effect>
+        </Button>
+    </StackPanel>
+</UserControl>

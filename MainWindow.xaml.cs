@@ -8,6 +8,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        DataContext = new MainViewModel();
+        var vm = new MainViewModel();
+        DataContext = vm;
+        Loaded += async (_, _) => await vm.TryAutoLoadAsync();
     }
 }
