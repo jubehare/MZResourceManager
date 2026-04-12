@@ -39,15 +39,13 @@
     <Grid>
         <StackPanel HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    MaxWidth="900">
-
+                    Visibility="{Binding ShowWelcome, Converter={StaticResource BoolToVis}}">
             <TextBlock Text="MZ Resource Manager"
                        FontSize="34"
                        FontWeight="Bold"
                        Foreground="{StaticResource AppColorSide2Brush}"
                        HorizontalAlignment="Center"
                        Margin="0,0,0,40"/>
-
             <Button Content="Open Game Folder…"
                     Command="{Binding OpenProjectCommand}"
                     Template="{StaticResource CtaBtn}"
@@ -65,5 +63,144 @@
                 </Button.Effect>
             </Button>
         </StackPanel>
+
+        <!-- Loading -->
+        <StackPanel HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="Loading…"
+                       FontSize="22"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource AppColorSide2Brush}"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,12"/>
+            <TextBlock Text="{Binding LoadStatus}"
+                       FontSize="12"
+                       Foreground="{StaticResource AppColorSide1Brush}"
+                       HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <!-- Main -->
+        <Grid Visibility="{Binding ProjectLoaded, Converter={StaticResource BoolToVis}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="240"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left sidebar -->
+            <Border Grid.Column="0"
+                    Background="{StaticResource AppColorSide2Brush}"
+                    Padding="20,24,20,20">
+                <StackPanel>
+                    <StackPanel>
+
+                        <TextBlock Text="MZ Resource Manager"
+                                   FontSize="10"
+                                   Foreground="{StaticResource AppColorMain2Brush}"
+                                   Margin="0,0,0,6"/>
+
+                        <TextBlock Text="{Binding GameTitle}"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource AppColorMain1Brush}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,6"/>
+
+                        <TextBlock Text="{Binding GameFolderDisplay}"
+                                   FontSize="10"
+                                   Foreground="{StaticResource AppColorMain1Brush}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,10"/>
+
+                        <Button Content="Open Another Folder…"
+                                Command="{Binding OpenProjectCommand}"
+                                Template="{StaticResource CtaBtn}"
+                                Foreground="White"
+                                FontSize="12"
+                                Height="34"
+                                Cursor="Hand"
+                                Margin="0,0,0,20"/>
+
+                        <Separator Background="{StaticResource AppColorSide1Brush}"
+                                   Margin="0,0,0,16"/>
+
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Maps"
+                                       Foreground="{StaticResource AppColorMain1Brush}"
+                                       FontSize="12"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding MapCount}"
+                                       Foreground="{StaticResource AppColorMain2Brush}"
+                                       FontSize="12"
+                                       FontWeight="Bold"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Items"
+                                       Foreground="{StaticResource AppColorMain1Brush}"
+                                       FontSize="12"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding ItemCount}"
+                                       Foreground="{StaticResource AppColorMain2Brush}"
+                                       FontSize="12"
+                                       FontWeight="Bold"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Switches"
+                                       Foreground="{StaticResource AppColorMain1Brush}"
+                                       FontSize="12"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding SwitchCount}"
+                                       Foreground="{StaticResource AppColorMain2Brush}"
+                                       FontSize="12"
+                                       FontWeight="Bold"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Variables"
+                                       Foreground="{StaticResource AppColorMain1Brush}"
+                                       FontSize="12"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding VariableCount}"
+                                       Foreground="{StaticResource AppColorMain2Brush}"
+                                       FontSize="12"
+                                       FontWeight="Bold"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Common Events"
+                                       Foreground="{StaticResource AppColorMain1Brush}"
+                                       FontSize="12"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding CommonEventCount}"
+                                       Foreground="{StaticResource AppColorMain2Brush}"
+                                       FontSize="12"
+                                       FontWeight="Bold"/>
+                        </Grid>
+
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Grid Grid.Column="1"
+                  Background="{StaticResource AppColorMain1Brush}"/>
+        </Grid>
     </Grid>
 </Window>

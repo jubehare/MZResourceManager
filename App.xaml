@@ -18,6 +18,7 @@
             <SolidColorBrush x:Key="AppColorSide2Brush"
                              Color="{StaticResource AppColorSide2}"/>
 
+            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
