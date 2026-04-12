@@ -1,0 +1,81 @@
+<UserControl x:Class="MZResourceManager.Views.MapListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0"
+              Margin="20,16,20,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Maps"
+                       FontSize="18"
+                       FontWeight="Bold"
+                       Foreground="{StaticResource AppColorSide2Brush}"
+                       VerticalAlignment="Center"
+                       Margin="0,0,16,0"/>
+
+            <ComboBox Grid.Column="1"
+                      ItemsSource="{Binding FlatMaps}"
+                      SelectedItem="{Binding SelectedMap}"
+                      DisplayMemberPath="Name"
+                      IsEditable="True"
+                      IsTextSearchEnabled="True"
+                      TextSearch.TextPath="Name"
+                      VerticalContentAlignment="Center"/>
+
+            <Button Grid.Column="2"
+                    Content="Export PNG"
+                    Command="{Binding ExportMapCommand}"
+                    Template="{StaticResource CtaBtn}"
+                    Foreground="White"
+                    FontSize="12"
+                    Height="30"
+                    Padding="14,0"
+                    Margin="12,0,0,0"
+                    Cursor="Hand"
+                    IsEnabled="{Binding CanExportMap}"/>
+
+            <Button Grid.Column="4"
+                    Content="{Binding ExportAllLabel}"
+                    Command="{Binding ExportAllMapsCommand}"
+                    Template="{StaticResource CtaBtn}"
+                    Foreground="White"
+                    FontSize="12"
+                    Height="30"
+                    Padding="14,0"
+                    Cursor="Hand"
+                    IsEnabled="{Binding CanExportAll}"/>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto"
+                      Background="#111111">
+
+            <Grid>
+                <Image Source="{Binding MapImage}"
+                       Stretch="None"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+
+                <TextBlock Text="Rendering…"
+                           Foreground="White"
+                           FontSize="14"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Visibility="{Binding IsRenderingMap, Converter={StaticResource BoolToVis}}"/>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
