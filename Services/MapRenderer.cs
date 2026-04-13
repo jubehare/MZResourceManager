@@ -8,10 +8,11 @@ namespace MZResourceManager.Services;
 
 public static class MapRenderer
 {
-    private const int TileW = 48;
-    private const int TileH = 48;
-    private const int HalfW = 24;
-    private const int HalfH = 24;
+    private record TileMetrics(int TileW, int TileH, int HalfW, int HalfH)
+    {
+        public static TileMetrics From(int tileSize) =>
+            new(tileSize, tileSize, tileSize / 2, tileSize / 2);
+    }
 
     // Ported from rmmz_core.js
     private static readonly int[][] Floor = [
@@ -38,7 +39,7 @@ public static class MapRenderer
 
     public static async Task<BitmapSource?> RenderAsync(
         int mapId, string gameFolder, IReadOnlyList<MzTileset> tilesets,
-        CancellationToken ct = default)
+        int tileSize = 48, CancellationToken ct = default)
     {
         var mapPath = System.IO.Path.Combine(gameFolder, "data", $"Map{mapId:D3}.json");
         if (!File.Exists(mapPath)) return null;
@@ -55,11 +56,13 @@ public static class MapRenderer
         var tileset = tilesets.FirstOrDefault(t => t.Id == mapData.TilesetId);
         if (tileset == null) return null;
 
+        var tm = TileMetrics.From(tileSize);
+
         var sheetData = await Task.Run(() => DecodeSheets(gameFolder, tileset), ct);
 
-        int pw = mapData.Width * TileW;
-        int ph = mapData.Height * TileH;
-        var pixels = await Task.Run(() => RenderPixels(mapData, pw, ph, sheetData), ct);
+        int pw = mapData.Width * tm.TileW;
+        int ph = mapData.Height * tm.TileH;
+        var pixels = await Task.Run(() => RenderPixels(mapData, pw, ph, sheetData, tm), ct);
 
         var bmp = BitmapSource.Create(pw, ph, 96, 96, PixelFormats.Pbgra32, null, pixels, pw * 4);
         bmp.Freeze();
@@ -111,7 +114,7 @@ public static class MapRenderer
     // Rendering
 
     private static byte[] RenderPixels(MzMapData map, int pw, int ph,
-        Dictionary<int, SheetData> sheets)
+        Dictionary<int, SheetData> sheets, TileMetrics tm)
     {
         var dst = new byte[pw * ph * 4];
 
@@ -125,32 +128,32 @@ public static class MapRenderer
                 {
                     int tileId = map.Data[layer * map.Height * map.Width + y * map.Width + x];
                     if (tileId <= 0) continue;
-                    DrawTile(dst, pw, tileId, x * TileW, y * TileH, sheets);
+                    DrawTile(dst, pw, tileId, x * tm.TileW, y * tm.TileH, sheets, tm);
                 }
 
         return dst;
     }
 
     private static void DrawTile(byte[] dst, int dstW, int tileId, int dx, int dy,
-        Dictionary<int, SheetData> sheets)
+        Dictionary<int, SheetData> sheets, TileMetrics tm)
     {
         if (tileId >= 2048)
         {
-            DrawAutotile(dst, dstW, tileId, dx, dy, sheets);
+            DrawAutotile(dst, dstW, tileId, dx, dy, sheets, tm);
         }
         else
         {
             int setNumber = tileId >= 1536 ? 4 : 5 + tileId / 256;
             if (!sheets.TryGetValue(setNumber, out var s)) return;
 
-            int sx = ((tileId / 128 % 2) * 8 + (tileId % 8)) * TileW;
-            int sy = (tileId % 256 / 8 % 16) * TileH;
-            Blit(dst, dstW, s, sx, sy, dx, dy, TileW, TileH);
+            int sx = ((tileId / 128 % 2) * 8 + (tileId % 8)) * tm.TileW;
+            int sy = (tileId % 256 / 8 % 16) * tm.TileH;
+            Blit(dst, dstW, s, sx, sy, dx, dy, tm.TileW, tm.TileH);
         }
     }
 
     private static void DrawAutotile(byte[] dst, int dstW, int tileId, int dx, int dy,
-        Dictionary<int, SheetData> sheets)
+        Dictionary<int, SheetData> sheets, TileMetrics tm)
     {
         int kind = (tileId - 2048) / 48;
         int shape = (tileId - 2048) % 48;
@@ -204,11 +207,11 @@ public static class MapRenderer
         {
             int qsx = entry[i * 2];
             int qsy = entry[i * 2 + 1];
-            int sx1 = (bx * 2 + qsx) * HalfW;
-            int sy1 = (by * 2 + qsy) * HalfH;
-            int dx1 = dx + (i % 2) * HalfW;
-            int dy1 = dy + (i / 2) * HalfH;
-            Blit(dst, dstW, sheet, sx1, sy1, dx1, dy1, HalfW, HalfH);
+            int sx1 = (bx * 2 + qsx) * tm.HalfW;
+            int sy1 = (by * 2 + qsy) * tm.HalfH;
+            int dx1 = dx + (i % 2) * tm.HalfW;
+            int dy1 = dy + (i / 2) * tm.HalfH;
+            Blit(dst, dstW, sheet, sx1, sy1, dx1, dy1, tm.HalfW, tm.HalfH);
         }
     }
 

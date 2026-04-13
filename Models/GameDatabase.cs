@@ -7,6 +7,7 @@ public class GameDatabase
     public int TileSize { get; set; } = 48;
 
     public List<NamedEntry> Items { get; set; } = [];
+    public List<MzItem> ItemDetails { get; set; } = [];
     public List<NamedEntry> Weapons { get; set; } = [];
     public List<NamedEntry> Armors { get; set; } = [];
     public List<NamedEntry> Actors { get; set; } = [];
@@ -21,4 +22,5 @@ public class GameDatabase
     public Dictionary<int, MzMap> Maps { get; set; } = [];
     public List<MzTileset> Tilesets { get; set; } = [];
     public List<MzCommonEvent> CommonEvents { get; set; } = [];
+    public List<MzPlugin> Plugins { get; set; } = [];
 }

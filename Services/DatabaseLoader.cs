@@ -25,9 +25,10 @@ public class DatabaseLoader
         db.TileSize = system.Advanced.TileSize > 0 ? system.Advanced.TileSize : 48;
         db.Switches = BuildNamedList(system.Switches);
         db.Variables = BuildNamedList(system.Variables);
+        db.Plugins = system.Plugins.Where(p => p.Status).ToList();
 
         progress?.Report("Loading database…");
-        var itemsTask = LoadNamedListAsync(Path.Combine(dataDir, "Items.json"), ct);
+        var itemsTask = LoadNullableListAsync<MzItem>(Path.Combine(dataDir, "Items.json"), ct);
         var weaponsTask = LoadNamedListAsync(Path.Combine(dataDir, "Weapons.json"), ct);
         var armorsTask = LoadNamedListAsync(Path.Combine(dataDir, "Armors.json"), ct);
         var actorsTask = LoadNamedListAsync(Path.Combine(dataDir, "Actors.json"), ct);
@@ -36,7 +37,8 @@ public class DatabaseLoader
         var statesTask = LoadNamedListAsync(Path.Combine(dataDir, "States.json"), ct);
         var enemiesTask = LoadNamedListAsync(Path.Combine(dataDir, "Enemies.json"), ct);
         await Task.WhenAll(itemsTask, weaponsTask, armorsTask, actorsTask, classesTask, skillsTask, statesTask, enemiesTask);
-        db.Items = await itemsTask;
+        db.ItemDetails = await itemsTask;
+        db.Items = db.ItemDetails.Select(i => i.ToNamedEntry()).ToList();
         db.Weapons = await weaponsTask;
         db.Armors = await armorsTask;
         db.Actors = await actorsTask;

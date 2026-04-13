@@ -2,6 +2,15 @@ using System.Text.Json.Serialization;
 
 namespace MZResourceManager.Models;
 
+public class MzPlugin
+{
+    [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
+    [JsonPropertyName("status")] public bool Status { get; set; }
+    [JsonPropertyName("parameters")] public Dictionary<string, string> Parameters { get; set; } = [];
+}
+
+public record PluginParamUsage(string PluginName, string ParamKey, string ParamValue);
+
 public class MzSystemAdvanced
 {
     [JsonPropertyName("tileSize")] public int TileSize { get; set; } = 48;
@@ -22,4 +31,5 @@ public class MzSystem
     [JsonPropertyName("battleBgm")] public AudioFile? BattleBgm { get; set; }
     [JsonPropertyName("defeatMe")] public AudioFile? DefeatMe { get; set; }
     [JsonPropertyName("victoryMe")] public AudioFile? VictoryMe { get; set; }
+    [JsonPropertyName("plugins")] public List<MzPlugin> Plugins { get; set; } = [];
 }
