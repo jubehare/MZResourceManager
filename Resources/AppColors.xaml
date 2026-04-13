@@ -1,0 +1,28 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Main colors -->
+    <Color x:Key="AppColorMain1">#FFF8F0</Color>
+    <Color x:Key="AppColorMain2">#C08552</Color>
+    <Color x:Key="AppColorSide1">#8C5A3C</Color>
+    <Color x:Key="AppColorSide2">#4B2E2B</Color>
+
+    <SolidColorBrush x:Key="AppColorMain1Brush" Color="{StaticResource AppColorMain1}"/>
+    <SolidColorBrush x:Key="AppColorMain2Brush" Color="{StaticResource AppColorMain2}"/>
+    <SolidColorBrush x:Key="AppColorSide1Brush" Color="{StaticResource AppColorSide1}"/>
+    <SolidColorBrush x:Key="AppColorSide2Brush" Color="{StaticResource AppColorSide2}"/>
+
+    <!-- Text -->
+    <Color x:Key="AppColorTextMuted">#A08060</Color>
+    <Color x:Key="AppColorTextBody">#7A5A40</Color>
+    <Color x:Key="AppColorTextLabel">#A09080</Color>
+
+    <SolidColorBrush x:Key="AppColorTextMutedBrush" Color="{StaticResource AppColorTextMuted}"/>
+    <SolidColorBrush x:Key="AppColorTextBodyBrush" Color="{StaticResource AppColorTextBody}"/>
+    <SolidColorBrush x:Key="AppColorTextLabelBrush" Color="{StaticResource AppColorTextLabel}"/>
+
+    <!-- Border -->
+    <Color x:Key="AppColorBorder">#EDE5DD</Color>
+    <SolidColorBrush x:Key="AppColorBorderBrush" Color="{StaticResource AppColorBorder}"/>
+
+</ResourceDictionary>

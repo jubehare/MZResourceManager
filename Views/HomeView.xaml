@@ -1,0 +1,76 @@
+<UserControl x:Class="MZResourceManager.Views.HomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <StackPanel HorizontalAlignment="Center"
+                    MaxWidth="640"
+                    Margin="40,48,40,48">
+
+            <TextBlock Text="MZ Resource Manager"
+                       FontSize="26" FontWeight="Bold"
+                       Foreground="{StaticResource AppColorSide2Brush}"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,32"/>
+
+            <TextBlock Text="FEATURES"
+                       FontSize="9" FontWeight="Bold"
+                       Foreground="{StaticResource AppColorTextLabelBrush}"
+                       Margin="0,0,0,12"/>
+
+            <UniformGrid Columns="2" Margin="0,0,0,28">
+
+                <Border Style="{StaticResource FeatureCard}" Margin="0,0,6,6">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource FeatureTitle}" Text="Maps"/>
+                        <TextBlock Style="{StaticResource FeatureBody}"
+                                   Text="Browse and preview all maps, export as PNG, and trace teleport links."/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource FeatureCard}" Margin="6,0,0,6">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource FeatureTitle}" Text="Switches &amp; Variables"/>
+                        <TextBlock Style="{StaticResource FeatureBody}"
+                                   Text="Search all named entries and see every event that uses them."/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource FeatureCard}" Margin="0,0,6,6">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource FeatureTitle}" Text="Resources"/>
+                        <TextBlock Style="{StaticResource FeatureBody}"
+                                   Text="Browse audio and picture files and see which events use each one."/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource FeatureCard}" Margin="6,0,0,6">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource FeatureTitle}" Text="Tilesets"/>
+                        <TextBlock Style="{StaticResource FeatureBody}"
+                                   Text="Inspect tileset sheet slots and see which maps use each tileset."/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource FeatureCard}" Margin="0,0,6,0">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource FeatureTitle}" Text="Unused Resources"/>
+                        <TextBlock Style="{StaticResource FeatureBody}"
+                                   Text="Find audio and picture files that are never used by any event."/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource FeatureCard}" Margin="6,0,0,0">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource FeatureTitle}" Text="Script Book Export"/>
+                        <TextBlock Style="{StaticResource FeatureBody}"
+                                   Text="Export all map and common event scripts to a plain-text document."/>
+                    </StackPanel>
+                </Border>
+
+            </UniformGrid>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
