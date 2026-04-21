@@ -11,7 +11,13 @@ using System.Windows.Media.Imaging;
 
 namespace MZResourceManager.ViewModels;
 
-public enum ActiveTab { None, Maps, Items, Switches, Variables, CommonEvents }
+public enum ActiveTab
+{
+    None,
+    Maps, Items, Switches, Variables, CommonEvents,
+    ResAudio, ResPictures,
+    UnusedResources, TilesetAnalyze, ScriptBookExport, TextSearch
+}
 
 public partial class MainViewModel : ObservableObject
 {
@@ -21,6 +27,8 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowWelcome))]
+    [NotifyPropertyChangedFor(nameof(ShowHome))]
+    [NotifyCanExecuteChangedFor(nameof(ReloadProjectCommand))]
     private bool _projectLoaded;
 
     [ObservableProperty] private string _loadStatus = string.Empty;
@@ -32,17 +40,79 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private int _variableCount;
     [ObservableProperty] private int _commonEventCount;
 
+    [ObservableProperty] private int _audioCount;
+    [ObservableProperty] private int _pictureCount;
+    [ObservableProperty] private int _tilesetCount;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowMaps))]
+    [NotifyPropertyChangedFor(nameof(ShowResourceSearch))]
+    [NotifyPropertyChangedFor(nameof(ShowNamedList))]
+    [NotifyPropertyChangedFor(nameof(ShowUnusedResources))]
+    [NotifyPropertyChangedFor(nameof(ShowTilesetAnalyze))]
+    [NotifyPropertyChangedFor(nameof(ShowScriptBookExport))]
+    [NotifyPropertyChangedFor(nameof(ShowTextSearch))]
+    [NotifyPropertyChangedFor(nameof(ShowHome))]
     private ActiveTab _activeTab = ActiveTab.None;
 
     public bool ShowWelcome => !ProjectLoaded && !IsLoading;
+    public bool ShowHome => ProjectLoaded && ActiveTab == ActiveTab.None;
     public bool ShowMaps => ActiveTab == ActiveTab.Maps;
+    public bool ShowResourceSearch => ActiveTab is ActiveTab.ResAudio or ActiveTab.ResPictures;
+    public bool ShowNamedList => ActiveTab is
+        ActiveTab.Items or ActiveTab.Switches or ActiveTab.Variables or ActiveTab.CommonEvents;
+    public bool ShowUnusedResources => ActiveTab == ActiveTab.UnusedResources;
+    public bool ShowTilesetAnalyze => ActiveTab == ActiveTab.TilesetAnalyze;
+    public bool ShowScriptBookExport => ActiveTab == ActiveTab.ScriptBookExport;
+    public bool ShowTextSearch => ActiveTab == ActiveTab.TextSearch;
+
+    [RelayCommand]
+    private void NavigateHome() => ActiveTab = ActiveTab.None;
+
+    [RelayCommand(CanExecute = nameof(ProjectLoaded))]
+    private async Task ReloadProjectAsync()
+    {
+        if (_db?.GameFolder is { } folder)
+            await LoadProjectAsync(folder);
+    }
+
+    public ResourceSearchViewModel ResourceSearch { get; } = new();
+    public UnusedResourcesViewModel UnusedResources { get; } = new();
+    public TilesetAnalyzeViewModel TilesetAnalyze { get; } = new();
+    public ScriptBookExportViewModel ScriptBookExport { get; } = new();
+    public TextSearchViewModel TextSearch { get; } = new();
+
+    private readonly NamedListViewModel _switchList = new();
+    private readonly NamedListViewModel _variableList = new();
+    private readonly NamedListViewModel _commonEventList = new();
+    private readonly NamedListViewModel _itemList = new();
 
     public ObservableCollection<MapInfoNode> MapRoots { get; } = [];
+    public ObservableCollection<MapInfo> FilteredMaps { get; } = [];
     public List<MapInfo> FlatMaps { get; private set; } = [];
 
+    [ObservableProperty] private string _mapFilterText = string.Empty;
+
+    partial void OnMapFilterTextChanged(string value)
+    {
+        var text = value?.Trim() ?? string.Empty;
+        FilteredMaps.Clear();
+        foreach (var m in FlatMaps)
+        {
+            if (string.IsNullOrEmpty(text) ||
+                m.Name.Contains(text, StringComparison.OrdinalIgnoreCase) ||
+                m.Id.ToString().Contains(text))
+                FilteredMaps.Add(m);
+        }
+    }
+
     [ObservableProperty] private MapInfo? _selectedMap;
+
+    [ObservableProperty] private bool _isSearchingTransfers;
+    [ObservableProperty] private string _transferStatusText = string.Empty;
+
+    public ObservableCollection<Models.MapEventUsage> MapTransferResults { get; } = [];
+    public ObservableCollection<Models.CommonEventUsage> CommonTransferResults { get; } = [];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanExportMap))]
@@ -94,6 +164,46 @@ public partial class MainViewModel : ObservableObject
     partial void OnSelectedMapChanged(MapInfo? value)
     {
         _ = RenderSelectedMapAsync();
+        _ = SearchMapTransfersAsync(value);
+    }
+
+    private async Task SearchMapTransfersAsync(MapInfo? map)
+    {
+        MapTransferResults.Clear();
+        CommonTransferResults.Clear();
+
+        if (map == null || _db == null)
+        {
+            TransferStatusText = string.Empty;
+            return;
+        }
+
+        IsSearchingTransfers = true;
+        TransferStatusText = $"Searching teleports to \"{map.Name}\"…";
+
+        try
+        {
+            var db = _db;
+            var mapId = map.Id;
+            var (mapR, commonR) = await Task.Run(() =>
+                Services.DatabaseEntrySearcher.SearchMapTransfers(db, mapId));
+
+            foreach (var r in mapR) MapTransferResults.Add(r);
+            foreach (var r in commonR) CommonTransferResults.Add(r);
+
+            int total = mapR.Count + commonR.Count;
+            TransferStatusText = total == 0
+                ? $"No teleport events point to \"{map.Name}\"."
+                : $"{mapR.Count} map event(s)  |  {commonR.Count} common event(s)";
+        }
+        catch (Exception ex)
+        {
+            TransferStatusText = $"Search error: {ex.Message}";
+        }
+        finally
+        {
+            IsSearchingTransfers = false;
+        }
     }
 
     private async Task RenderSelectedMapAsync()
@@ -109,7 +219,7 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            MapImage = await MapRenderer.RenderAsync(SelectedMap.Id, _db.GameFolder, _db.Tilesets, ct);
+            MapImage = await MapRenderer.RenderAsync(SelectedMap.Id, _db.GameFolder, _db.Tilesets, _db.TileSize, ct);
         }
         catch (OperationCanceledException) { }
         catch { MapImage = null; }
@@ -155,6 +265,7 @@ public partial class MainViewModel : ObservableObject
             var maps = _db.MapInfos;
             var sheets = _db.Tilesets;
             var folder = _db.GameFolder;
+            var tileSize = _db.TileSize;
 
             await Task.Run(async () =>
             {
@@ -166,7 +277,7 @@ public partial class MainViewModel : ObservableObject
                     App.Current.Dispatcher.Invoke(() =>
                         LoadStatus = $"Exporting {i + 1}/{maps.Count}: {info.Name}…");
 
-                    var bmp = await MapRenderer.RenderAsync(info.Id, folder, sheets);
+                    var bmp = await MapRenderer.RenderAsync(info.Id, folder, sheets, tileSize);
                     if (bmp == null) continue;
 
                     var entry = zip.CreateEntry($"{info.Name}.png", CompressionLevel.Fastest);
@@ -210,8 +321,49 @@ public partial class MainViewModel : ObservableObject
             "Switches" => ActiveTab.Switches,
             "Variables" => ActiveTab.Variables,
             "CommonEvents" => ActiveTab.CommonEvents,
+            "ResAudio" => ActiveTab.ResAudio,
+            "ResPictures" => ActiveTab.ResPictures,
+            "UnusedResources" => ActiveTab.UnusedResources,
+            "TilesetAnalyze" => ActiveTab.TilesetAnalyze,
+            "ScriptBookExport" => ActiveTab.ScriptBookExport,
+            "TextSearch" => ActiveTab.TextSearch,
             _ => ActiveTab.None,
         };
+
+        if (_db != null && ShowResourceSearch)
+        {
+            var category = ActiveTab == ActiveTab.ResPictures
+                ? ResourceCategory.Pictures
+                : ResourceCategory.Audio;
+            ResourceSearch.Initialize(_db, category);
+        }
+
+        if (ShowNamedList)
+            OnPropertyChanged(nameof(NamedList));
+    }
+
+    public NamedListViewModel NamedList => ActiveTab switch
+    {
+        ActiveTab.Items => _itemList,
+        ActiveTab.Switches => _switchList,
+        ActiveTab.Variables => _variableList,
+        ActiveTab.CommonEvents => _commonEventList,
+        _ => _switchList,
+    };
+
+    private void ScanResources(string folder)
+    {
+        static int Count(string dir, SearchOption opt = SearchOption.TopDirectoryOnly) =>
+            Directory.Exists(dir)
+                ? Directory.EnumerateFiles(dir, "*", opt)
+                           .Count(f => !Path.GetFileName(f).StartsWith('.'))
+                : 0;
+
+        var audio = Path.Combine(folder, "audio");
+        var img = Path.Combine(folder, "img");
+
+        AudioCount = Count(audio, SearchOption.AllDirectories);
+        PictureCount = Count(Path.Combine(img, "pictures"), SearchOption.AllDirectories);
     }
 
     private async Task LoadProjectAsync(string folder)
@@ -234,10 +386,30 @@ public partial class MainViewModel : ObservableObject
             VariableCount = _db.Variables.Count;
             CommonEventCount = _db.CommonEvents.Count;
 
+            TilesetCount = _db.Tilesets.Count(t => t.Id > 0 && !string.IsNullOrWhiteSpace(t.Name));
+            ScanResources(folder);
             FlatMaps = [.. _db.MapInfos.OrderBy(m => m.Id)];
             OnPropertyChanged(nameof(FlatMaps));
+            MapFilterText = string.Empty;
+            FilteredMaps.Clear();
+            foreach (var m in FlatMaps) FilteredMaps.Add(m);
             SelectedMap = FlatMaps.FirstOrDefault();
             BuildMapTree(_db.MapInfos);
+
+            UnusedResources.Initialize(_db);
+            TilesetAnalyze.Initialize(_db);
+            ScriptBookExport.Initialize(_db);
+            TextSearch.Initialize(_db);
+
+            _switchList.Initialize(_db, "Switches",
+                _db.Switches, Services.EntryKind.Switch);
+            _variableList.Initialize(_db, "Variables",
+                _db.Variables, Services.EntryKind.Variable);
+            _itemList.Initialize(_db, "Items",
+                _db.Items, Services.EntryKind.Item);
+            _commonEventList.Initialize(_db, "Common Events",
+                _db.CommonEvents.Select(ce => new Models.NamedEntry { Id = ce.Id, Name = ce.Name }),
+                Services.EntryKind.CommonEvent);
 
             _settings.LastGameFolder = folder;
             SettingsService.Save(_settings);
