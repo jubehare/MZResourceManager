@@ -1,0 +1,102 @@
+<UserControl x:Class="MZResourceManager.Views.TextSearchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Search bar -->
+        <Border Grid.Row="0"
+                Padding="16,12"
+                BorderBrush="{StaticResource AppColorBorderBrush}"
+                BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0"
+                         x:Name="QueryBox"
+                         Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                         FontSize="13"
+                         Padding="8,6"
+                         VerticalContentAlignment="Center"
+                         KeyDown="QueryBox_KeyDown"/>
+                <Button Grid.Column="2"
+                        Content="Search"
+                        Command="{Binding SearchCommand}"
+                        Template="{StaticResource CtaBtn}"
+                        Foreground="White"
+                        FontSize="12"
+                        Width="72"
+                        Height="32"
+                        Cursor="Hand"/>
+            </Grid>
+        </Border>
+
+        <!-- Status -->
+        <Border Grid.Row="1"
+                Padding="16,6"
+                BorderBrush="{StaticResource AppColorBorderBrush}"
+                BorderThickness="0,0,0,1">
+            <Grid>
+                <TextBlock Text="{Binding StatusText}"
+                           FontSize="11"
+                           Foreground="{StaticResource AppColorTextMutedBrush}"
+                           VerticalAlignment="Center"/>
+                <TextBlock Text="Searching…"
+                           FontSize="11"
+                           Foreground="{StaticResource AppColorMain2Brush}"
+                           HorizontalAlignment="Right"
+                           Visibility="{Binding IsSearching, Converter={StaticResource BoolToVis}}"/>
+            </Grid>
+        </Border>
+
+        <!-- Results -->
+        <TabControl Grid.Row="2">
+
+            <TabItem Header="Map Events">
+                <DataGrid ItemsSource="{Binding MapResults}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Map"
+                                            Binding="{Binding MapDisplay}"
+                                            Width="160"/>
+                        <DataGridTextColumn Header="Event"
+                                            Binding="{Binding EventDisplay}"
+                                            Width="160"/>
+                        <DataGridTextColumn Header="Page"
+                                            Binding="{Binding Page}"
+                                            Width="50"/>
+                        <DataGridTextColumn Header="Type"
+                                            Binding="{Binding CommandType}"
+                                            Width="130"/>
+                        <DataGridTextColumn Header="Matched Text"
+                                            Binding="{Binding MatchedText}"
+                                            Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+            <TabItem Header="Common Events">
+                <DataGrid ItemsSource="{Binding CommonResults}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Common Event"
+                                            Binding="{Binding EventDisplay}"
+                                            Width="200"/>
+                        <DataGridTextColumn Header="Type"
+                                            Binding="{Binding CommandType}"
+                                            Width="130"/>
+                        <DataGridTextColumn Header="Matched Text"
+                                            Binding="{Binding MatchedText}"
+                                            Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+        </TabControl>
+    </Grid>
+</UserControl>
