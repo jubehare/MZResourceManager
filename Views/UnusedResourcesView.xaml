@@ -1,0 +1,186 @@
+<UserControl x:Class="MZResourceManager.Views.UnusedResourcesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="#F3F3F3"
+                Padding="20,14"
+                BorderBrush="#D1D1D1"
+                BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="Unused Resources"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="{StaticResource AppColorSide2Brush}"/>
+                    <TextBlock Text="Files on disk that are not referenced in any map event or common event."
+                               FontSize="11"
+                               Foreground="#555555"
+                               Margin="0,3,0,0"/>
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        Template="{StaticResource CtaBtn}"
+                        Command="{Binding ScanCommand}"
+                        Foreground="White"
+                        FontSize="12"
+                        Height="34"
+                        Padding="18,0"
+                        Cursor="Hand"
+                        VerticalAlignment="Center">
+                    <Button.Content>
+                        <TextBlock>
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text"
+                                            Value="🔍  Scan"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsScanning}"
+                                                Value="True">
+                                            <Setter Property="Text"
+                                                    Value="Scanning…"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Button.Content>
+                </Button>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1"
+                Background="White"
+                Padding="20,8"
+                BorderBrush="#D1D1D1"
+                BorderThickness="0,0,0,1">
+            <TextBlock Text="{Binding StatusText}"
+                       FontSize="11"
+                       Foreground="#767676"
+                       VerticalAlignment="Center"/>
+        </Border>
+
+        <TabControl Grid.Row="2">
+            <TabControl.Resources>
+                <Style TargetType="TabPanel">
+                    <Setter Property="Background"
+                            Value="#F3F3F3"/>
+                </Style>
+            </TabControl.Resources>
+
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Audio"/>
+                        <Border Background="{StaticResource AppColorMain2Brush}"
+                                CornerRadius="8"
+                                Padding="6,1"
+                                Margin="6,0,0,0"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding FilteredAudio.Count}"
+                                       FontSize="10"
+                                       FontWeight="Bold"
+                                       Foreground="White"/>
+                        </Border>
+                    </StackPanel>
+                </TabItem.Header>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0"
+                            Background="White"
+                            Padding="12,8"
+                            BorderBrush="#D1D1D1"
+                            BorderThickness="0,0,0,1">
+                        <TextBox Text="{Binding AudioFilterText, UpdateSourceTrigger=PropertyChanged}"
+                                 Padding="6,4"
+                                 FontSize="12"
+                                 BorderBrush="#D1D1D1"
+                                 BorderThickness="1"
+                                 MaxWidth="320"
+                                 HorizontalAlignment="Left"/>
+                    </Border>
+                    <DataGrid Grid.Row="1"
+                            ItemsSource="{Binding FilteredAudio}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Folder"
+                                    Binding="{Binding SubFolder}"
+                                    Width="80"/>
+                            <DataGridTextColumn Header="Name"
+                                    Binding="{Binding Name}"
+                                    Width="*"/>
+                            <DataGridTextColumn Header="Path"
+                                    Binding="{Binding FullPath}"
+                                    Width="300"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Pictures"/>
+                        <Border Background="{StaticResource AppColorMain2Brush}"
+                                CornerRadius="8"
+                                Padding="6,1"
+                                Margin="6,0,0,0"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding FilteredPictures.Count}"
+                                       FontSize="10"
+                                       FontWeight="Bold"
+                                       Foreground="White"/>
+                        </Border>
+                    </StackPanel>
+                </TabItem.Header>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0"
+                            Background="White"
+                            Padding="12,8"
+                            BorderBrush="#D1D1D1"
+                            BorderThickness="0,0,0,1">
+                        <TextBox Text="{Binding PictureFilterText, UpdateSourceTrigger=PropertyChanged}"
+                                 Padding="6,4"
+                                 FontSize="12"
+                                 BorderBrush="#D1D1D1"
+                                 BorderThickness="1"
+                                 MaxWidth="320"
+                                 HorizontalAlignment="Left"/>
+                    </Border>
+                    <DataGrid Grid.Row="1"
+                            ItemsSource="{Binding FilteredPictures}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Subfolder"
+                                    Binding="{Binding SubFolder}"
+                                    Width="120"/>
+                            <DataGridTextColumn Header="Name"
+                                    Binding="{Binding Name}"
+                                    Width="*"/>
+                            <DataGridTextColumn Header="Path"
+                                    Binding="{Binding FullPath}"
+                                    Width="300"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>

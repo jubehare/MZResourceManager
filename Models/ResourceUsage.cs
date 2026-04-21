@@ -17,4 +17,15 @@ public record CommonEventUsage(
     string EventName,
     string Detail);
 
+public record TextSearchResult(
+    int    MapId,
+    string MapName,
+    string EventDisplay,
+    string Page,
+    string CommandType,
+    string MatchedText)
+{
+    public string MapDisplay => $"{MapId:D3}  {MapName}";
+}
+
 public enum ResourceCategory { Audio, Pictures }
