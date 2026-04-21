@@ -11,6 +11,29 @@
                 <ResourceDictionary Source="Resources/CardStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+            <Style TargetType="DataGrid">
+                <Setter Property="AutoGenerateColumns"
+                        Value="False"/>
+                <Setter Property="HorizontalScrollBarVisibility"
+                        Value="Auto"/>
+                <Setter Property="VerticalScrollBarVisibility"
+                        Value="Auto"/>
+                <Setter Property="CanUserAddRows"
+                        Value="False"/>
+                <Setter Property="CanUserDeleteRows"
+                        Value="False"/>
+                <Setter Property="CanUserResizeRows"
+                        Value="False"/>
+                <Setter Property="IsReadOnly"
+                        Value="True"/>
+                <Setter Property="SelectionMode"
+                        Value="Single"/>
+                <Setter Property="GridLinesVisibility"
+                        Value="Horizontal"/>
+                <Setter Property="BorderThickness"
+                        Value="0"/>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
