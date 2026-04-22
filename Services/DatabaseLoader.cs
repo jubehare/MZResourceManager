@@ -26,6 +26,7 @@ public class DatabaseLoader
         db.Switches = BuildNamedList(system.Switches);
         db.Variables = BuildNamedList(system.Variables);
         db.Plugins = system.Plugins.Where(p => p.Status).ToList();
+        db.System = system;
 
         progress?.Report("Loading database…");
         var itemsTask = LoadNullableListAsync<MzItem>(Path.Combine(dataDir, "Items.json"), ct);

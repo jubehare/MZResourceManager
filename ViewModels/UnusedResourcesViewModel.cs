@@ -10,7 +10,9 @@ public partial class UnusedResourcesViewModel : ObservableObject
 {
     private GameDatabase? _db;
 
-    [ObservableProperty] private bool _isScanning;
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ScanCommand))]
+    private bool _isScanning;
     [ObservableProperty] private string _statusText = string.Empty;
     [ObservableProperty] private bool _hasScanned;
 
@@ -27,13 +29,14 @@ public partial class UnusedResourcesViewModel : ObservableObject
     {
         _db = db;
         HasScanned = false;
-        StatusText = "Click Scan to detect unused audio and picture files.";
+        StatusText = "Click Scan to detect unused audio and image files.";
         _allAudio = [];
         _allPictures = [];
         FilteredAudio.Clear();
         FilteredPictures.Clear();
         AudioFilterText = string.Empty;
         PictureFilterText = string.Empty;
+        ScanCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand(CanExecute = nameof(CanScan))]
@@ -59,8 +62,8 @@ public partial class UnusedResourcesViewModel : ObservableObject
             RebuildPictures();
 
             StatusText = audio.Count + pictures.Count == 0
-                ? "No unused files found. 🎉"
-                : $"{audio.Count} unused audio  |  {pictures.Count} unused picture(s)";
+                ? "No unused files found."
+                : $"{audio.Count} unused audio  |  {pictures.Count} unused image(s)";
         }
         catch (Exception ex)
         {

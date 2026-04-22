@@ -13,25 +13,43 @@ public static class UnusedFileDetector
     private static readonly string[] AudioExts = [".ogg", ".m4a", ".mp3", ".wav"];
     private static readonly string[] ImageExts = [".png", ".jpg", ".jpeg", ".webp"];
 
-    private static readonly (string Sub, string Label)[] AudioSubDirs =
+    private static readonly (string Dir, string Label)[] AudioDirs =
     [
-        ("bgm", "BGM"), ("bgs", "BGS"), ("me", "ME"), ("se", "SE"),
+        (Path.Combine("audio", "bgm"), "BGM"),
+        (Path.Combine("audio", "bgs"), "BGS"),
+        (Path.Combine("audio", "me"),  "ME"),
+        (Path.Combine("audio", "se"),  "SE"),
+    ];
+
+    private static readonly (string Dir, string Label)[] ImageDirs =
+    [
+        (Path.Combine("img", "pictures"),    "pictures"),
+        (Path.Combine("img", "parallaxes"),  "parallaxes"),
+        (Path.Combine("img", "battlebacks1"),"battlebacks1"),
+        (Path.Combine("img", "battlebacks2"),"battlebacks2"),
+        (Path.Combine("img", "titles1"),     "titles1"),
+        (Path.Combine("img", "titles2"),     "titles2"),
     ];
 
     public static (List<UnusedFile> Audio, List<UnusedFile> Pictures) Detect(GameDatabase db)
     {
         var usedAudio = CollectUsedAudio(db);
-        var usedPictures = CollectUsedPictures(db);
+        var usedImages = CollectUsedImages(db);
 
-        var unusedAudio = ScanAudioFiles(db.GameFolder, usedAudio);
-        var unusedPictures = ScanPictureFiles(db.GameFolder, usedPictures);
+        var unusedAudio = ScanFiles(db.GameFolder, AudioDirs, AudioExts, usedAudio);
+        var unusedImages = ScanFiles(db.GameFolder, ImageDirs, ImageExts, usedImages);
 
-        return (unusedAudio, unusedPictures);
+        return (unusedAudio, unusedImages);
     }
 
     private static HashSet<string> CollectUsedAudio(GameDatabase db)
     {
         var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        AddAudio(used, db.System.TitleBgm?.Name);
+        AddAudio(used, db.System.BattleBgm?.Name);
+        AddAudio(used, db.System.DefeatMe?.Name);
+        AddAudio(used, db.System.VictoryMe?.Name);
 
         foreach (var map in db.Maps.Values)
         {
@@ -48,74 +66,69 @@ public static class UnusedFileDetector
         return used;
     }
 
-    private static HashSet<string> CollectUsedPictures(GameDatabase db)
+
+    private static HashSet<string> CollectUsedImages(GameDatabase db)
     {
         var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+        // System images
+        AddImage(used, db.System.Title1Name);
+        AddImage(used, db.System.Title2Name);
+        AddImage(used, db.System.Battleback1Name);
+        AddImage(used, db.System.Battleback2Name);
+
+        // Map images
         foreach (var map in db.Maps.Values)
         {
-            AddPicture(used, map.ParallaxName);
-            AddPicture(used, map.Battleback1Name);
-            AddPicture(used, map.Battleback2Name);
+            AddImage(used, map.ParallaxName);
+            AddImage(used, map.Battleback1Name);
+            AddImage(used, map.Battleback2Name);
         }
 
-        // Event commands (Show Picture = code 231)
+        // Event commands: Show Picture (231)
         foreach (var cmd in AllCommands(db))
         {
             if (cmd.Code == 231)
-                AddPicture(used, cmd.GetStringParam(1));
+                AddImage(used, cmd.GetStringParam(1));
         }
 
         return used;
     }
 
-    private static List<UnusedFile> ScanAudioFiles(string gameFolder, HashSet<string> used)
+
+    private static List<UnusedFile> ScanFiles(
+        string gameFolder,
+        (string Dir, string Label)[] dirs,
+        string[] extensions,
+        HashSet<string> used)
     {
         var result = new List<UnusedFile>();
 
-        foreach (var (sub, label) in AudioSubDirs)
+        foreach (var (rel, label) in dirs)
         {
-            var dir = Path.Combine(gameFolder, "audio", sub);
+            var dir = Path.Combine(gameFolder, rel);
             if (!Directory.Exists(dir)) continue;
 
-            foreach (var file in Directory.EnumerateFiles(dir))
+            foreach (var file in Directory.EnumerateFiles(dir, "*", SearchOption.AllDirectories))
             {
-                if (!AudioExts.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase))
-                    continue;
+                var ext = Path.GetExtension(file);
+                if (!extensions.Contains(ext, StringComparer.OrdinalIgnoreCase)) continue;
+
                 var stem = Path.GetFileNameWithoutExtension(file);
-                if (stem.StartsWith('.') || string.IsNullOrEmpty(stem)) continue;
+                if (string.IsNullOrEmpty(stem) || stem.StartsWith('.')) continue;
+
+                var fileDir = Path.GetDirectoryName(file)!;
+                var relative = Path.GetRelativePath(dir, fileDir);
+                var subLabel = relative == "." ? label : $"{label}/{relative.Replace('\\', '/')}";
+
                 if (!used.Contains(stem))
-                    result.Add(new(stem, label, file));
+                    result.Add(new UnusedFile(stem, subLabel, file));
             }
         }
 
         return [.. result.OrderBy(f => f.SubFolder).ThenBy(f => f.Name)];
     }
 
-    private static List<UnusedFile> ScanPictureFiles(string gameFolder, HashSet<string> used)
-    {
-        var result = new List<UnusedFile>();
-        var baseDir = Path.Combine(gameFolder, "img", "pictures");
-        if (!Directory.Exists(baseDir)) return result;
-
-        foreach (var file in Directory.EnumerateFiles(baseDir, "*", SearchOption.AllDirectories))
-        {
-            if (!ImageExts.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase))
-                continue;
-            var stem = Path.GetFileNameWithoutExtension(file);
-            if (stem.StartsWith('.') || string.IsNullOrEmpty(stem)) continue;
-
-            var fileDir = Path.GetDirectoryName(file)!;
-            var relative = Path.GetRelativePath(baseDir, fileDir);
-            var subLabel = relative == "." ? string.Empty : relative.Replace('\\', '/');
-
-            var qualifiedKey = string.IsNullOrEmpty(subLabel) ? stem : $"{subLabel}/{stem}";
-            if (!used.Contains(stem) && !used.Contains(qualifiedKey))
-                result.Add(new(stem, subLabel, file));
-        }
-
-        return [.. result.OrderBy(f => f.SubFolder).ThenBy(f => f.Name)];
-    }
 
     private static IEnumerable<EventCommand> AllCommands(GameDatabase db)
     {
@@ -135,7 +148,7 @@ public static class UnusedFileDetector
         if (!string.IsNullOrWhiteSpace(name)) set.Add(name);
     }
 
-    private static void AddPicture(HashSet<string> set, string? name)
+    private static void AddImage(HashSet<string> set, string? name)
     {
         if (!string.IsNullOrWhiteSpace(name)) set.Add(name);
     }

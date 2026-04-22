@@ -23,4 +23,5 @@ public class GameDatabase
     public List<MzTileset> Tilesets { get; set; } = [];
     public List<MzCommonEvent> CommonEvents { get; set; } = [];
     public List<MzPlugin> Plugins { get; set; } = [];
+    public MzSystem System { get; set; } = new();
 }
