@@ -28,6 +28,7 @@ public partial class NamedListViewModel : ObservableObject
 
     public ObservableCollection<MapEventUsage> MapResults { get; } = [];
     public ObservableCollection<CommonEventUsage> CommonResults { get; } = [];
+    public ObservableCollection<TroopEventUsage> TroopResults { get; } = [];
     public ObservableCollection<PluginParamUsage> PluginResults { get; } = [];
 
     public ObservableCollection<NamedEntry> FilteredEntries { get; } = [];
@@ -55,6 +56,7 @@ public partial class NamedListViewModel : ObservableObject
         SelectedItemDetail = null;
         MapResults.Clear();
         CommonResults.Clear();
+        TroopResults.Clear();
         PluginResults.Clear();
         StatusText = $"{AllEntries.Count} entries — pick one to find usages.";
     }
@@ -69,6 +71,7 @@ public partial class NamedListViewModel : ObservableObject
         OnPropertyChanged(nameof(ShowItemDetail));
         MapResults.Clear();
         CommonResults.Clear();
+        TroopResults.Clear();
         PluginResults.Clear();
 
         if (value == null)
@@ -111,24 +114,26 @@ public partial class NamedListViewModel : ObservableObject
             var kind = _kind;
             var id = entry.Id;
 
-            var (mapR, commonR, pluginR) = await System.Threading.Tasks.Task.Run(() =>
+            var (mapR, commonR, troopR, pluginR) = await System.Threading.Tasks.Task.Run(() =>
             {
-                var (m, c) = DatabaseEntrySearcher.Search(db, id, kind);
-                var p = DatabaseEntrySearcher.SearchPluginParams(db, id);
-                return (m, c, p);
+                var (m, c, t) = DatabaseEntrySearcher.Search(db, id, kind);
+                var p = DatabaseEntrySearcher.SearchPluginParams(db, id, kind);
+                return (m, c, t, p);
             });
 
             MapResults.Clear();
             foreach (var r in mapR) MapResults.Add(r);
             CommonResults.Clear();
             foreach (var r in commonR) CommonResults.Add(r);
+            TroopResults.Clear();
+            foreach (var r in troopR) TroopResults.Add(r);
             PluginResults.Clear();
             foreach (var r in pluginR) PluginResults.Add(r);
 
-            int total = mapR.Count + commonR.Count + pluginR.Count;
+            int total = mapR.Count + commonR.Count + troopR.Count + pluginR.Count;
             StatusText = total == 0
                 ? $"No usages found for \"{entry.Name}\"."
-                : $"{mapR.Count} map  |  {commonR.Count} common  |  {pluginR.Count} plugin param(s)";
+                : $"{mapR.Count} map  |  {commonR.Count} common  |  {troopR.Count} battle  |  {pluginR.Count} plugin param(s)";
         }
         catch (Exception ex)
         {

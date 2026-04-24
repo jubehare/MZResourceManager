@@ -8,96 +8,208 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- Header -->
         <Border Grid.Row="0"
                 Background="White"
-                Padding="24,18"
+                Padding="24,16"
                 BorderBrush="#D1D1D1"
                 BorderThickness="0,0,0,1">
             <StackPanel>
                 <TextBlock Text="Script Book Export"
-                           FontSize="18"
-                           FontWeight="Bold"
-                           Foreground="#1A1A1A"
-                           Margin="0,0,0,4"/>
-                <TextBlock Text="Export all map events and common events to a readable text file."
-                           FontSize="12"
-                           Foreground="#767676"/>
+                           FontSize="17" FontWeight="Bold"
+                           Foreground="#1A1A1A" Margin="0,0,0,3"/>
+                <TextBlock Text="Export events and database entries to a readable document."
+                           FontSize="12" Foreground="#767676"/>
             </StackPanel>
         </Border>
 
-        <ScrollViewer Grid.Row="1"
-                      VerticalScrollBarVisibility="Auto"
-                      Padding="24,24,24,24">
-            <StackPanel MaxWidth="480"
-                        HorizontalAlignment="Left">
+        <!-- Two-column body -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="290"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                <Border Background="White"
-                        BorderBrush="#D1D1D1"
-                        BorderThickness="1"
-                        CornerRadius="8"
-                        Padding="20,16"
-                        Margin="0,0,0,20">
+            <!-- ── LEFT COLUMN: options ──────────────────────────────────── -->
+            <Border Grid.Column="0"
+                    BorderBrush="#D1D1D1"
+                    BorderThickness="0,0,1,0"
+                    Background="#FAFAFA">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              Padding="18,16,18,20">
                     <StackPanel>
-                        <TextBlock Text="OPTIONS"
-                                   FontSize="9"
-                                   FontWeight="Bold"
-                                   Foreground="#767676"
-                                   Margin="0,0,0,14"/>
 
-                        <CheckBox Content="Include Map Events"
+                        <!-- CONTENT section -->
+                        <TextBlock Text="CONTENT"
+                                   FontSize="9" FontWeight="Bold"
+                                   Foreground="#767676" Margin="0,0,0,10"/>
+
+                        <CheckBox Content="Map Events"
                                   IsChecked="{Binding IncludeMaps}"
-                                  FontSize="13"
-                                  Foreground="#1A1A1A"
-                                  Margin="0,0,0,10"/>
-
-                        <CheckBox Content="Include Common Events"
+                                  FontSize="13" Foreground="#1A1A1A"
+                                  Margin="0,0,0,8"/>
+                        <CheckBox Content="Common Events"
                                   IsChecked="{Binding IncludeCommonEvents}"
-                                  FontSize="13"
-                                  Foreground="#1A1A1A"
-                                  Margin="0,0,0,10"/>
+                                  FontSize="13" Foreground="#1A1A1A"
+                                  Margin="0,0,0,8"/>
+                        <CheckBox Content="Battle Events (Troops)"
+                                  IsChecked="{Binding IncludeBattleEvents}"
+                                  FontSize="13" Foreground="#1A1A1A"
+                                  Margin="0,0,0,8"/>
+                        <CheckBox Content="Actor Profiles"
+                                  IsChecked="{Binding IncludeActorProfiles}"
+                                  FontSize="13" Foreground="#1A1A1A"
+                                  Margin="0,0,0,8"/>
+                        <CheckBox Content="Items Glossary"
+                                  IsChecked="{Binding IncludeItemsGlossary}"
+                                  FontSize="13" Foreground="#1A1A1A"
+                                  Margin="0,0,0,14"/>
+
+                        <Separator Background="#E0E0E0" Margin="0,0,0,12"/>
 
                         <CheckBox Content="Include empty pages / events"
                                   IsChecked="{Binding IncludeEmptyPages}"
-                                  FontSize="13"
-                                  Foreground="#1A1A1A"/>
+                                  FontSize="12" Foreground="#555555"/>
+
                     </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <!-- ── RIGHT COLUMN: format + theme + preview + export ──────── -->
+            <Grid Grid.Column="1" Margin="20,16,20,16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Format + Theme row -->
+                <Grid Grid.Row="0" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Format card -->
+                    <Border Grid.Column="0"
+                            Background="White"
+                            BorderBrush="#D1D1D1" BorderThickness="1"
+                            CornerRadius="6" Padding="14,10">
+                        <StackPanel>
+                            <TextBlock Text="FORMAT"
+                                       FontSize="9" FontWeight="Bold"
+                                       Foreground="#767676" Margin="0,0,0,8"/>
+                            <RadioButton Content="HTML  (.html)"
+                                         IsChecked="{Binding IsHtml}"
+                                         FontSize="12" Foreground="#1A1A1A"
+                                         Margin="0,0,0,5"/>
+                            <RadioButton Content="Word  (.docx)"
+                                         IsChecked="{Binding IsDocx}"
+                                         FontSize="12" Foreground="#1A1A1A"
+                                         Margin="0,0,0,5"/>
+                            <RadioButton Content="PDF  (.pdf)"
+                                         IsChecked="{Binding IsPdf}"
+                                         FontSize="12" Foreground="#1A1A1A"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Theme card -->
+                    <Border Grid.Column="2"
+                            Background="White"
+                            BorderBrush="#D1D1D1" BorderThickness="1"
+                            CornerRadius="6" Padding="14,10">
+                        <StackPanel>
+                            <TextBlock Text="COLOUR THEME"
+                                       FontSize="9" FontWeight="Bold"
+                                       Foreground="#767676" Margin="0,0,0,8"/>
+                            <RadioButton Content="Light"
+                                         IsChecked="{Binding IsLight}"
+                                         FontSize="12" Foreground="#1A1A1A"
+                                         Margin="0,0,0,5"/>
+                            <RadioButton Content="Sepia"
+                                         IsChecked="{Binding IsSepia}"
+                                         FontSize="12" Foreground="#1A1A1A"
+                                         Margin="0,0,0,5"/>
+                            <RadioButton Content="Dark"
+                                         IsChecked="{Binding IsDark}"
+                                         FontSize="12" Foreground="#1A1A1A"
+                                         Margin="0,0,0,5"/>
+                            <RadioButton Content="Minimal"
+                                         IsChecked="{Binding IsMinimal}"
+                                         FontSize="12" Foreground="#1A1A1A"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Preview panel -->
+                <Border Grid.Row="1"
+                        BorderBrush="#D1D1D1" BorderThickness="1"
+                        CornerRadius="6"
+                        ClipToBounds="True">
+                    <Grid>
+                        <WebBrowser x:Name="PreviewBrowser"/>
+                        <TextBlock Text="Preview will appear after project is loaded."
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Foreground="#AAAAAA" FontSize="12"
+                                   IsHitTestVisible="False">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CanExport}" Value="False">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
                 </Border>
 
-                <Button Content="{Binding ExportLabel}"
-                        Command="{Binding ExportCommand}"
-                        IsEnabled="{Binding CanExport}"
-                        Template="{StaticResource CtaBtn}"
-                        Foreground="White"
-                        FontSize="13"
-                        Height="40"
-                        Cursor="Hand"
-                        Margin="0,0,0,14"/>
+                <!-- Export row -->
+                <Grid Grid.Row="2" Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                <TextBlock Text="{Binding StatusText}"
-                           FontSize="12"
-                           Foreground="{StaticResource AppColorMain2Brush}"
-                           TextWrapping="Wrap">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Visibility"
-                                    Value="Visible"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding StatusText}"
-                                             Value="">
-                                    <Setter Property="Visibility"
-                                            Value="Collapsed"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding StatusText}"
-                                             Value="{x:Null}">
-                                    <Setter Property="Visibility"
-                                            Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
+                    <Button Grid.Column="0"
+                            Content="{Binding ExportLabel}"
+                            Command="{Binding ExportCommand}"
+                            IsEnabled="{Binding CanExport}"
+                            Template="{StaticResource CtaBtn}"
+                            Foreground="White"
+                            FontSize="13"
+                            Height="38"
+                            MinWidth="180"
+                            Cursor="Hand"/>
 
-            </StackPanel>
-        </ScrollViewer>
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding StatusText}"
+                               FontSize="12"
+                               Foreground="{StaticResource AppColorMain2Brush}"
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Center"
+                               Margin="14,0,0,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding StatusText}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding StatusText}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

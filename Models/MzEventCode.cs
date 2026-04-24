@@ -30,4 +30,33 @@ public static class MzEventCode
     public const int Script = 355;
     public const int PluginCommandMv = 356;
     public const int PluginCommand = 357;
+
+    public static string Label(int code) => code switch
+    {
+        ShowText => "Show Text (face)",
+        ShowTextBody => "Dialogue",
+        ShowChoices => "Show Choices",
+        ChoiceBranch => "Choice",
+        InputNumber => "Input Number",
+        ShowScrollingText => "Scroll Text",
+        ScrollingTextBody => "Scroll Text body",
+        ConditionalBranch => "Conditional Branch",
+        CallCommonEvent => "Call Common Event",
+        ControlVariables => "Control Variables",
+        TransferPlayer => "Transfer Player",
+        ShowPicture => "Show Picture",
+        PlayBgm => "Play BGM",
+        PlayBgs => "Play BGS",
+        PlayMe => "Play ME",
+        PlaySe => "Play SE",
+        PlayMovie => "Play Movie",
+        BattleProcessing => "Battle Processing",
+        ShopProcessing => "Shop Processing",
+        ChangeActorName => "Change Actor Name",
+        ChangeActorNickname => "Change Actor Nickname",
+        Script => "Script",
+        PluginCommandMv => "Plugin Command (MV)",
+        PluginCommand => "Plugin Command",
+        _ => $"Code {code}",
+    };
 }

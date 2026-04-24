@@ -6,11 +6,12 @@ public enum EntryKind { Switch, Variable, Item, CommonEvent }
 
 public static class DatabaseEntrySearcher
 {
-    public static (List<MapEventUsage> Map, List<CommonEventUsage> Common)
+    public static (List<MapEventUsage> Map, List<CommonEventUsage> Common, List<TroopEventUsage> Troop)
         Search(GameDatabase db, int entryId, EntryKind kind)
     {
         var mapResults = new List<MapEventUsage>();
         var commonResults = new List<CommonEventUsage>();
+        var troopResults = new List<TroopEventUsage>();
 
         foreach (var (mapId, map) in db.Maps)
         {
@@ -41,19 +42,47 @@ public static class DatabaseEntrySearcher
             }
         }
 
-        return (mapResults, commonResults);
+        foreach (var troop in db.TroopList)
+        {
+            for (int pi = 0; pi < troop.Pages.Count; pi++)
+            {
+                foreach (var cmd in troop.Pages[pi].List)
+                {
+                    var detail = GetDetail(cmd, entryId, kind);
+                    if (detail == null) continue;
+                    troopResults.Add(new(troop.Id, troop.Name, pi, detail));
+                }
+            }
+        }
+
+        return (mapResults, commonResults, troopResults);
     }
 
-    // TODO: scan active plugin parameters for values
-    public static List<PluginParamUsage> SearchPluginParams(GameDatabase db, int id)
+    public static List<PluginParamUsage> SearchPluginParams(GameDatabase db, int id, EntryKind kind)
     {
         var results = new List<PluginParamUsage>();
         var idStr = id.ToString();
+
+        string[] matchTypes = kind switch
+        {
+            EntryKind.Variable => ["variable"],
+            EntryKind.Switch => ["switch"],
+            EntryKind.CommonEvent => ["common_event"],
+            EntryKind.Item => ["item"],
+            _ => [],
+        };
+        if (matchTypes.Length == 0) return results;
 
         foreach (var plugin in db.Plugins)
         {
             foreach (var (key, rawValue) in plugin.Parameters)
             {
+
+                if (!plugin.ParamTypes.TryGetValue(key, out var type)) continue;
+
+                var baseType = type.TrimEnd('[', ']');
+                if (!matchTypes.Contains(baseType, StringComparer.OrdinalIgnoreCase)) continue;
+
                 if (ContainsId(rawValue, idStr))
                     results.Add(new(plugin.Name, key, rawValue));
             }
@@ -101,11 +130,12 @@ public static class DatabaseEntrySearcher
 
 
     // Finds all events that transfer the player directly to mapId
-    public static (List<MapEventUsage> Map, List<CommonEventUsage> Common)
+    public static (List<MapEventUsage> Map, List<CommonEventUsage> Common, List<TroopEventUsage> Troop)
         SearchMapTransfers(GameDatabase db, int mapId)
     {
         var mapResults = new List<MapEventUsage>();
         var commonResults = new List<CommonEventUsage>();
+        var troopResults = new List<TroopEventUsage>();
 
         foreach (var (srcMapId, map) in db.Maps)
         {
@@ -136,12 +166,25 @@ public static class DatabaseEntrySearcher
             }
         }
 
-        return (mapResults, commonResults);
+        foreach (var troop in db.TroopList.Where(t => t.Id > 0))
+        {
+            for (int pi = 0; pi < troop.Pages.Count; pi++)
+            {
+                foreach (var cmd in troop.Pages[pi].List)
+                {
+                    var detail = GetTransferDetail(cmd, mapId);
+                    if (detail == null) continue;
+                    troopResults.Add(new(troop.Id, troop.Name, pi, detail));
+                }
+            }
+        }
+
+        return (mapResults, commonResults, troopResults);
     }
 
     private static string? GetTransferDetail(EventCommand cmd, int mapId)
     {
-        if (cmd.Code != 201) return null;
+        if (cmd.Code != MzEventCode.TransferPlayer) return null;
         // params[0]: 0 = direct map, 1 = variable
         if (cmd.GetIntParam(0) == 0 && cmd.GetIntParam(1) == mapId)
         {
@@ -165,13 +208,13 @@ public static class DatabaseEntrySearcher
     {
         switch (cmd.Code)
         {
-            case 111 when cmd.GetIntParam(0) == 0 && cmd.GetIntParam(1) == id:
+            case MzEventCode.ConditionalBranch when cmd.GetIntParam(0) == 0 && cmd.GetIntParam(1) == id:
                 {
                     var state = cmd.GetIntParam(2) == 1 ? "ON" : "OFF";
                     return $"Condition: Switch [{id:D4}] is {state}";
                 }
 
-            case 121 when cmd.GetIntParam(0) <= id && id <= cmd.GetIntParam(1):
+            case MzEventCode.ControlSwitches when cmd.GetIntParam(0) <= id && id <= cmd.GetIntParam(1):
                 {
                     var start = cmd.GetIntParam(0);
                     var end = cmd.GetIntParam(1);
@@ -188,10 +231,10 @@ public static class DatabaseEntrySearcher
     {
         switch (cmd.Code)
         {
-            case 111 when cmd.GetIntParam(0) == 1 && cmd.GetIntParam(1) == id:
+            case MzEventCode.ConditionalBranch when cmd.GetIntParam(0) == 1 && cmd.GetIntParam(1) == id:
                 return $"Condition: Variable [{id:D4}]";
 
-            case 122 when cmd.GetIntParam(0) <= id && id <= cmd.GetIntParam(1):
+            case MzEventCode.ControlVariables when cmd.GetIntParam(0) <= id && id <= cmd.GetIntParam(1):
                 {
                     var start = cmd.GetIntParam(0);
                     var end = cmd.GetIntParam(1);
@@ -207,14 +250,14 @@ public static class DatabaseEntrySearcher
     {
         switch (cmd.Code)
         {
-            case 126 when cmd.GetIntParam(0) == id:
+            case MzEventCode.ChangeItems when cmd.GetIntParam(0) == id:
                 {
                     var op = cmd.GetIntParam(1) == 0 ? "+" : "−";
                     var amt = cmd.GetIntParam(3);
                     return $"Change Items [{id:D4}] {op}{amt}";
                 }
 
-            case 111 when cmd.GetIntParam(0) == 9 && cmd.GetIntParam(1) == id:
+            case MzEventCode.ConditionalBranch when cmd.GetIntParam(0) == 9 && cmd.GetIntParam(1) == id:
                 return $"Condition: Has Item [{id:D4}]";
 
             default: return null;
@@ -223,7 +266,7 @@ public static class DatabaseEntrySearcher
 
     private static string? GetCommonEventDetail(EventCommand cmd, int id)
     {
-        if (cmd.Code == 117 && cmd.GetIntParam(0) == id)
+        if (cmd.Code == MzEventCode.CallCommonEvent && cmd.GetIntParam(0) == id)
             return $"Call Common Event [{id:D3}]";
         return null;
     }

@@ -11,6 +11,7 @@ public class GameDatabase
     public List<NamedEntry> Weapons { get; set; } = [];
     public List<NamedEntry> Armors { get; set; } = [];
     public List<NamedEntry> Actors { get; set; } = [];
+    public List<MzActor> ActorDetails { get; set; } = [];
     public List<NamedEntry> Classes { get; set; } = [];
     public List<NamedEntry> Skills { get; set; } = [];
     public List<NamedEntry> States { get; set; } = [];

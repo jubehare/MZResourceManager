@@ -5,14 +5,19 @@ namespace MZResourceManager.Services;
 
 public static class TextSearcher
 {
-    public static (List<TextSearchResult> Map, List<TextSearchResult> Common)
+    public static (
+        List<TextSearchResult> Map,
+        List<TextSearchResult> Common,
+        List<TextSearchResult> Troop,
+        List<PluginParamUsage> Plugin)
         Search(GameDatabase db, string query)
     {
         if (string.IsNullOrWhiteSpace(query))
-            return ([], []);
+            return ([], [], [], []);
 
         var mapResults = new List<TextSearchResult>();
         var commonResults = new List<TextSearchResult>();
+        var troopResults = new List<TextSearchResult>();
 
         foreach (var (mapId, map) in db.Maps)
         {
@@ -43,16 +48,90 @@ public static class TextSearcher
             }
         }
 
-        return (mapResults, commonResults);
+        foreach (var troop in db.TroopList)
+        {
+            for (int pi = 0; pi < troop.Pages.Count; pi++)
+            {
+                foreach (var cmd in troop.Pages[pi].List)
+                {
+                    var (type, text) = Match(cmd, query);
+                    if (text == null) continue;
+                    troopResults.Add(new(troop.Id, troop.Name,
+                        $"Page {pi + 1}", $"{pi + 1}", type, text));
+                }
+            }
+        }
+
+        var pluginResults = SearchPluginParams(db, query);
+
+        return (mapResults, commonResults, troopResults, pluginResults);
+    }
+
+    // Scans every enabled plugin's parameter values for strings matching query.
+    // Handles plain strings, single-encoded JSON, and VisuMZ-style double-encoded structs.
+    private static List<PluginParamUsage> SearchPluginParams(GameDatabase db, string query)
+    {
+        var results = new List<PluginParamUsage>();
+        foreach (var plugin in db.Plugins)
+            foreach (var (key, rawValue) in plugin.Parameters)
+                WalkParamString(rawValue, query, plugin.Name, key, results);
+        return results;
+    }
+
+    private static void WalkParamString(
+        string raw, string query,
+        string pluginName, string path,
+        List<PluginParamUsage> results)
+    {
+        var v = raw.Trim();
+        if (v.StartsWith('{') || v.StartsWith('['))
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(v);
+                WalkParamJson(doc.RootElement, query, pluginName, path, results);
+            }
+            catch { }
+        }
+        else if (v.Contains(query, StringComparison.OrdinalIgnoreCase))
+        {
+            results.Add(new(pluginName, path, v));
+        }
+    }
+
+    private static void WalkParamJson(
+        JsonElement el, string query,
+        string pluginName, string path,
+        List<PluginParamUsage> results)
+    {
+        switch (el.ValueKind)
+        {
+            case JsonValueKind.String:
+                var s = el.GetString() ?? "";
+                // VisuMZ stores nested structs as double-encoded JSON strings
+                if (s.StartsWith('{') || s.StartsWith('['))
+                    WalkParamString(s, query, pluginName, path, results);
+                else if (s.Contains(query, StringComparison.OrdinalIgnoreCase))
+                    results.Add(new(pluginName, path, s));
+                break;
+            case JsonValueKind.Object:
+                foreach (var prop in el.EnumerateObject())
+                    WalkParamJson(prop.Value, query, pluginName, $"{path} › {prop.Name}", results);
+                break;
+            case JsonValueKind.Array:
+                int i = 0;
+                foreach (var item in el.EnumerateArray())
+                    WalkParamJson(item, query, pluginName, $"{path}[{i++}]", results);
+                break;
+        }
     }
 
     private static (string Type, string? Text) Match(EventCommand cmd, string query)
     {
-        var strings = ExtractStrings(cmd);
-        foreach (var s in strings)
+        foreach (var (_, value) in ExtractStrings(cmd))
         {
-            if (s.Value.Contains(query, StringComparison.OrdinalIgnoreCase))
-                return (CommandLabel(cmd.Code), s.Value);
+            if (value.Contains(query, StringComparison.OrdinalIgnoreCase))
+                return (MzEventCode.Label(cmd.Code), value);
         }
         return (string.Empty, null);
     }
@@ -69,12 +148,18 @@ public static class TextSearcher
                     if (s.Length > 0)
                     {
                         yield return ($"p{i}", s);
+                        // Walk nested JSON strings (e.g. VisuMZ struct parameters)
                         if (s.StartsWith('{') || s.StartsWith('['))
-                        {
                             foreach (var inner in ExtractJsonStrings(s))
                                 yield return inner;
-                        }
                     }
+                    break;
+
+                // Walk JSON objects/arrays directly — covers code-357 args object
+                case JsonValueKind.Object:
+                case JsonValueKind.Array:
+                    foreach (var r in WalkJson(p))
+                        yield return r;
                     break;
             }
         }
@@ -97,7 +182,13 @@ public static class TextSearcher
         {
             case JsonValueKind.String:
                 var s = el.GetString() ?? string.Empty;
-                if (s.Length > 0) yield return ("json", s);
+                if (s.Length > 0)
+                {
+                    yield return ("json", s);
+                    if (s.StartsWith('{') || s.StartsWith('['))
+                        foreach (var r in ExtractJsonStrings(s))
+                            yield return r;
+                }
                 break;
             case JsonValueKind.Object:
                 foreach (var p in el.EnumerateObject())
@@ -112,31 +203,4 @@ public static class TextSearcher
         }
     }
 
-    private static string CommandLabel(int code) => code switch
-    {
-        101 => "Show Text (face)",
-        401 => "Dialogue",
-        102 => "Show Choices",
-        402 => "Choice",
-        103 => "Input Number",
-        105 => "Scroll Text",
-        405 => "Scroll Text body",
-        111 => "Conditional Branch",
-        117 => "Call Common Event",
-        122 => "Control Variables",
-        201 => "Transfer Player",
-        231 => "Show Picture",
-        241 => "Play BGM",
-        245 => "Play BGS",
-        249 => "Play ME",
-        250 => "Play SE",
-        261 => "Play Movie",
-        301 => "Battle Processing",
-        302 => "Shop Processing",
-        320 => "Change Actor Name",
-        324 => "Change Actor Nickname",
-        355 => "Script",
-        356 => "Plugin Command",
-        _ => $"Code {code}",
-    };
 }

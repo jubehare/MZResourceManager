@@ -7,6 +7,8 @@ public class MzPlugin
     [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
     [JsonPropertyName("status")] public bool Status { get; set; }
     [JsonPropertyName("parameters")] public Dictionary<string, string> Parameters { get; set; } = [];
+
+    public Dictionary<string, string> ParamTypes { get; set; } = [];
 }
 
 public record PluginParamUsage(string PluginName, string ParamKey, string ParamValue);
