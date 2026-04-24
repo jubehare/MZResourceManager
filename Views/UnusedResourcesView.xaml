@@ -3,184 +3,590 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
 
-        <Border Grid.Row="0"
-                Background="#F3F3F3"
-                Padding="20,14"
-                BorderBrush="#D1D1D1"
-                BorderThickness="0,0,0,1">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+        <StackPanel HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    MaxWidth="420"
+                    Visibility="{Binding ShowWelcome, Converter={StaticResource BoolToVis}}">
 
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Unused Resources"
-                               FontSize="18"
-                               FontWeight="Bold"
-                               Foreground="{StaticResource AppColorSide2Brush}"/>
-                    <TextBlock Text="Files on disk that are not referenced in any map event or common event."
-                               FontSize="11"
-                               Foreground="#555555"
-                               Margin="0,3,0,0"/>
-                </StackPanel>
+            <TextBlock Text="🗑"
+                       FontSize="48"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,14"/>
 
-                <Button Grid.Column="1"
-                        Template="{StaticResource CtaBtn}"
-                        Command="{Binding ScanCommand}"
-                        Foreground="White"
-                        FontSize="12"
-                        Height="34"
-                        Padding="18,0"
-                        Cursor="Hand"
-                        VerticalAlignment="Center">
-                    <Button.Content>
-                        <TextBlock>
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text"
-                                            Value="🔍  Scan"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsScanning}"
-                                                Value="True">
-                                            <Setter Property="Text"
-                                                    Value="Scanning…"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </Button.Content>
-                </Button>
-            </Grid>
-        </Border>
+            <TextBlock Text="Unused Resources"
+                       FontSize="22"
+                       FontWeight="Bold"
+                       Foreground="{StaticResource AppColorSide2Brush}"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,10"/>
 
-        <Border Grid.Row="1"
-                Background="White"
-                Padding="20,8"
-                BorderBrush="#D1D1D1"
-                BorderThickness="0,0,0,1">
+            <TextBlock Text="Scans your game folder for audio and image files that are not referenced by any map event, common event, battle event, or plugin command."
+                       FontSize="13"
+                       Foreground="#666666"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,30"/>
+
+            <Button Template="{StaticResource CtaBtn}"
+                    Command="{Binding ScanCommand}"
+                    Content="🔍  Start Scan"
+                    Foreground="White"
+                    FontSize="13"
+                    Padding="28,10"
+                    Cursor="Hand"
+                    HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <StackPanel HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Width="340"
+                    Visibility="{Binding ShowScanning, Converter={StaticResource BoolToVis}}">
+
+            <TextBlock Text="Scanning project…"
+                       FontSize="15"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource AppColorSide2Brush}"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,18"/>
+
+            <ProgressBar IsIndeterminate="True"
+                         Height="4"
+                         BorderThickness="0"
+                         Foreground="{StaticResource AppColorMain2Brush}"
+                         Background="#E0E0E0"/>
+
             <TextBlock Text="{Binding StatusText}"
                        FontSize="11"
-                       Foreground="#767676"
-                       VerticalAlignment="Center"/>
-        </Border>
+                       Foreground="#888888"
+                       HorizontalAlignment="Center"
+                       Margin="0,12,0,0"/>
+        </StackPanel>
 
-        <TabControl Grid.Row="2">
-            <TabControl.Resources>
-                <Style TargetType="TabPanel">
-                    <Setter Property="Background"
-                            Value="#F3F3F3"/>
-                </Style>
-            </TabControl.Resources>
+        <Grid Visibility="{Binding ShowResults, Converter={StaticResource BoolToVis}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Audio"/>
-                        <Border Background="{StaticResource AppColorMain2Brush}"
-                                CornerRadius="8"
-                                Padding="6,1"
-                                Margin="6,0,0,0"
-                                VerticalAlignment="Center">
-                            <TextBlock Text="{Binding FilteredAudio.Count}"
-                                       FontSize="10"
-                                       FontWeight="Bold"
-                                       Foreground="White"/>
-                        </Border>
-                    </StackPanel>
-                </TabItem.Header>
+            <Border Grid.Row="0"
+                    Background="#F3F3F3"
+                    Padding="16,9"
+                    BorderBrush="#D1D1D1"
+                    BorderThickness="0,0,0,1">
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Border Grid.Row="0"
-                            Background="White"
-                            Padding="12,8"
-                            BorderBrush="#D1D1D1"
-                            BorderThickness="0,0,0,1">
-                        <TextBox Text="{Binding AudioFilterText, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="6,4"
-                                 FontSize="12"
-                                 BorderBrush="#D1D1D1"
-                                 BorderThickness="1"
-                                 MaxWidth="320"
-                                 HorizontalAlignment="Left"/>
-                    </Border>
-                    <DataGrid Grid.Row="1"
-                            ItemsSource="{Binding FilteredAudio}">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Folder"
-                                    Binding="{Binding SubFolder}"
-                                    Width="80"/>
-                            <DataGridTextColumn Header="Name"
-                                    Binding="{Binding Name}"
-                                    Width="*"/>
-                            <DataGridTextColumn Header="Path"
-                                    Binding="{Binding FullPath}"
-                                    Width="300"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                    <TextBlock Text="{Binding StatusText}"
+                               FontSize="11"
+                               Foreground="#767676"
+                               VerticalAlignment="Center"/>
+                    <Button HorizontalAlignment="Right"
+                            Content="🔍  Re-Scan"
+                            Command="{Binding ScanCommand}"
+                            Template="{StaticResource CtaBtn}"
+                            Foreground="White"
+                            FontSize="11"
+                            Padding="14,5"
+                            Height="28"
+                            Cursor="Hand"/>
                 </Grid>
-            </TabItem>
+            </Border>
 
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Pictures"/>
-                        <Border Background="{StaticResource AppColorMain2Brush}"
-                                CornerRadius="8"
-                                Padding="6,1"
-                                Margin="6,0,0,0"
-                                VerticalAlignment="Center">
-                            <TextBlock Text="{Binding FilteredPictures.Count}"
-                                       FontSize="10"
-                                       FontWeight="Bold"
-                                       Foreground="White"/>
+            <TabControl Grid.Row="1">
+                <TabControl.Resources>
+                    <Style TargetType="TabPanel">
+                        <Setter Property="Background"
+                                Value="#F3F3F3"/>
+                    </Style>
+                </TabControl.Resources>
+
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Audio"/>
+                            <Border Background="{StaticResource AppColorMain2Brush}"
+                                    CornerRadius="8"
+                                    Padding="6,1"
+                                    Margin="6,0,0,0"
+                                    VerticalAlignment="Center">
+                                <TextBlock Text="{Binding FilteredAudio.Count}"
+                                           FontSize="10"
+                                           FontWeight="Bold"
+                                           Foreground="White"/>
+                            </Border>
+                        </StackPanel>
+                    </TabItem.Header>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="220"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0"
+                                BorderBrush="#D1D1D1"
+                                BorderThickness="0,0,1,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <Border Grid.Row="0"
+                                        Background="White"
+                                        Padding="14,12"
+                                        BorderBrush="#D1D1D1"
+                                        BorderThickness="0,0,0,1">
+                                    <TextBlock Text="Audio Files"
+                                               FontSize="14"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource AppColorSide2Brush}"/>
+                                </Border>
+
+                                <Border Grid.Row="1"
+                                        Background="White"
+                                        Padding="8,6"
+                                        BorderBrush="#D1D1D1"
+                                        BorderThickness="0,0,0,1">
+                                    <ItemsControl ItemsSource="{Binding AudioSubFolderOptions}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Content="{Binding Name}"
+                                                        Command="{Binding DataContext.SelectAudioSubFolderCommand,
+                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        Margin="0,0,4,4"
+                                                        Padding="8,3"
+                                                        FontSize="10"
+                                                        Cursor="Hand">
+                                                    <Button.Style>
+                                                        <Style TargetType="Button">
+                                                            <Setter Property="Background"
+                                                                    Value="#D1D1D1"/>
+                                                            <Setter Property="Foreground"
+                                                                    Value="#1A1A1A"/>
+                                                            <Setter Property="BorderThickness"
+                                                                    Value="0"/>
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="Button">
+                                                                        <Border x:Name="Bd"
+                                                                                Background="{TemplateBinding Background}"
+                                                                                CornerRadius="10"
+                                                                                Padding="{TemplateBinding Padding}">
+                                                                            <ContentPresenter HorizontalAlignment="Center"
+                                                                                              VerticalAlignment="Center"/>
+                                                                        </Border>
+                                                                        <ControlTemplate.Triggers>
+                                                                            <Trigger Property="IsMouseOver"
+                                                                                     Value="True">
+                                                                                <Setter TargetName="Bd"
+                                                                                        Property="Background"
+                                                                                        Value="#0078D4"/>
+                                                                                <Setter Property="Foreground"
+                                                                                        Value="White"/>
+                                                                            </Trigger>
+                                                                        </ControlTemplate.Triggers>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsSelected}"
+                                                                             Value="True">
+                                                                    <Setter Property="Background"
+                                                                            Value="#0078D4"/>
+                                                                    <Setter Property="Foreground"
+                                                                            Value="White"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Button.Style>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Border>
+
+                                <ListBox Grid.Row="2"
+                                         ItemsSource="{Binding FilteredAudio}"
+                                         SelectedItem="{Binding SelectedAudioFile}"
+                                         Background="White"
+                                         BorderThickness="0"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Padding"
+                                                    Value="12,7"/>
+                                            <Setter Property="BorderThickness"
+                                                    Value="0,0,0,1"/>
+                                            <Setter Property="BorderBrush"
+                                                    Value="#EFEFEF"/>
+                                            <Setter Property="HorizontalContentAlignment"
+                                                    Value="Stretch"/>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Name}"
+                                                           FontSize="12"/>
+                                                <TextBlock Text="{Binding SubFolder}"
+                                                           FontSize="10"
+                                                           Foreground="#767676"
+                                                           Margin="0,1,0,0">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility"
+                                                                    Value="Visible"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding SubFolder}"
+                                                                             Value="">
+                                                                    <Setter Property="Visibility"
+                                                                            Value="Collapsed"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
                         </Border>
-                    </StackPanel>
-                </TabItem.Header>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Border Grid.Row="0"
-                            Background="White"
-                            Padding="12,8"
-                            BorderBrush="#D1D1D1"
-                            BorderThickness="0,0,0,1">
-                        <TextBox Text="{Binding PictureFilterText, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="6,4"
-                                 FontSize="12"
-                                 BorderBrush="#D1D1D1"
-                                 BorderThickness="1"
-                                 MaxWidth="320"
-                                 HorizontalAlignment="Left"/>
-                    </Border>
-                    <DataGrid Grid.Row="1"
-                            ItemsSource="{Binding FilteredPictures}">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Subfolder"
-                                    Binding="{Binding SubFolder}"
-                                    Width="120"/>
-                            <DataGridTextColumn Header="Name"
-                                    Binding="{Binding Name}"
-                                    Width="*"/>
-                            <DataGridTextColumn Header="Path"
-                                    Binding="{Binding FullPath}"
-                                    Width="300"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
-            </TabItem>
-        </TabControl>
+
+                        <Grid Grid.Column="1">
+                            <TextBlock Text="Select a file on the left to preview."
+                                       Foreground="#999999"
+                                       FontSize="13"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility"
+                                                Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedAudioFile}"
+                                                         Value="{x:Null}">
+                                                <Setter Property="Visibility"
+                                                        Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <StackPanel Margin="20,18"
+                                        Visibility="{Binding ShowAudioSelection, Converter={StaticResource BoolToVis}}">
+                                <StackPanel Orientation="Horizontal"
+                                            Margin="0,0,0,14">
+                                    <TextBlock Text="{Binding SelectedAudioFile.Name}"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Foreground="#1A1A1A"
+                                               VerticalAlignment="Center"/>
+                                    <Border Background="{StaticResource AppColorMain2Brush}"
+                                            CornerRadius="3"
+                                            Padding="6,2"
+                                            Margin="10,0,0,0"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding AudioTypeLabel}"
+                                                   FontSize="10"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"/>
+                                    </Border>
+                                    <Button Command="{Binding OpenAudioFileCommand}"
+                                            Width="26"
+                                            Height="26"
+                                            Margin="10,0,0,0"
+                                            Cursor="Hand"
+                                            ToolTip="Open file location">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="Bd"
+                                                        Background="#EBEBEB"
+                                                        CornerRadius="4">
+                                                    <TextBlock Text="&#xE838;"
+                                                               FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="12"
+                                                               Foreground="#555555"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver"
+                                                             Value="True">
+                                                        <Setter TargetName="Bd"
+                                                                Property="Background"
+                                                                Value="#D6D6D6"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button x:Name="AudioPlayBtn"
+                                            Padding="10,4"
+                                            Content="▶  Play"
+                                            Click="AudioPlay_Click"
+                                            Margin="0,0,8,0"/>
+                                    <Button x:Name="AudioStopBtn"
+                                            Padding="10,4"
+                                            Content="■  Stop"
+                                            Click="AudioStop_Click"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </TabItem>
+
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Pictures"/>
+                            <Border Background="{StaticResource AppColorMain2Brush}"
+                                    CornerRadius="8"
+                                    Padding="6,1"
+                                    Margin="6,0,0,0"
+                                    VerticalAlignment="Center">
+                                <TextBlock Text="{Binding FilteredPictures.Count}"
+                                           FontSize="10"
+                                           FontWeight="Bold"
+                                           Foreground="White"/>
+                            </Border>
+                        </StackPanel>
+                    </TabItem.Header>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="220"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0"
+                                BorderBrush="#D1D1D1"
+                                BorderThickness="0,0,1,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <Border Grid.Row="0"
+                                        Background="White"
+                                        Padding="14,12"
+                                        BorderBrush="#D1D1D1"
+                                        BorderThickness="0,0,0,1">
+                                    <TextBlock Text="Picture Files"
+                                               FontSize="14"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource AppColorSide2Brush}"/>
+                                </Border>
+
+                                <Border Grid.Row="1"
+                                        Background="White"
+                                        Padding="8,6"
+                                        BorderBrush="#D1D1D1"
+                                        BorderThickness="0,0,0,1">
+                                    <ItemsControl ItemsSource="{Binding PictureSubFolderOptions}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Content="{Binding Name}"
+                                                        Command="{Binding DataContext.SelectPictureSubFolderCommand,
+                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        Margin="0,0,4,4"
+                                                        Padding="8,3"
+                                                        FontSize="10"
+                                                        Cursor="Hand">
+                                                    <Button.Style>
+                                                        <Style TargetType="Button">
+                                                            <Setter Property="Background"
+                                                                    Value="#D1D1D1"/>
+                                                            <Setter Property="Foreground"
+                                                                    Value="#1A1A1A"/>
+                                                            <Setter Property="BorderThickness"
+                                                                    Value="0"/>
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="Button">
+                                                                        <Border x:Name="Bd"
+                                                                                Background="{TemplateBinding Background}"
+                                                                                CornerRadius="10"
+                                                                                Padding="{TemplateBinding Padding}">
+                                                                            <ContentPresenter HorizontalAlignment="Center"
+                                                                                              VerticalAlignment="Center"/>
+                                                                        </Border>
+                                                                        <ControlTemplate.Triggers>
+                                                                            <Trigger Property="IsMouseOver"
+                                                                                     Value="True">
+                                                                                <Setter TargetName="Bd"
+                                                                                        Property="Background"
+                                                                                        Value="#0078D4"/>
+                                                                                <Setter Property="Foreground"
+                                                                                        Value="White"/>
+                                                                            </Trigger>
+                                                                        </ControlTemplate.Triggers>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsSelected}"
+                                                                             Value="True">
+                                                                    <Setter Property="Background"
+                                                                            Value="#0078D4"/>
+                                                                    <Setter Property="Foreground"
+                                                                            Value="White"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Button.Style>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Border>
+
+                                <ListBox Grid.Row="2"
+                                         ItemsSource="{Binding FilteredPictures}"
+                                         SelectedItem="{Binding SelectedPictureFile}"
+                                         Background="White"
+                                         BorderThickness="0"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Padding"
+                                                    Value="12,7"/>
+                                            <Setter Property="BorderThickness"
+                                                    Value="0,0,0,1"/>
+                                            <Setter Property="BorderBrush"
+                                                    Value="#EFEFEF"/>
+                                            <Setter Property="HorizontalContentAlignment"
+                                                    Value="Stretch"/>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Name}"
+                                                           FontSize="12"/>
+                                                <TextBlock Text="{Binding SubFolder}"
+                                                           FontSize="10"
+                                                           Foreground="#767676"
+                                                           Margin="0,1,0,0">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility"
+                                                                    Value="Visible"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding SubFolder}"
+                                                                             Value="">
+                                                                    <Setter Property="Visibility"
+                                                                            Value="Collapsed"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                        </Border>
+
+                        <Grid Grid.Column="1">
+                            <TextBlock Text="Select a file on the left to preview."
+                                       Foreground="#999999"
+                                       FontSize="13"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility"
+                                                Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedPictureFile}"
+                                                         Value="{x:Null}">
+                                                <Setter Property="Visibility"
+                                                        Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <Grid Margin="20,18"
+                                  Visibility="{Binding ShowPictureSelection, Converter={StaticResource BoolToVis}}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0"
+                                            Orientation="Horizontal"
+                                            Margin="0,0,0,10">
+                                    <TextBlock Text="{Binding SelectedPictureFile.Name}"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Foreground="#1A1A1A"
+                                               VerticalAlignment="Center"/>
+                                    <Button Command="{Binding OpenPictureFileCommand}"
+                                            Width="26"
+                                            Height="26"
+                                            Margin="8,0,0,0"
+                                            Cursor="Hand"
+                                            ToolTip="Open file location">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="Bd"
+                                                        Background="#EBEBEB"
+                                                        CornerRadius="4">
+                                                    <TextBlock Text="&#xE838;"
+                                                               FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="12"
+                                                               Foreground="#555555"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver"
+                                                             Value="True">
+                                                        <Setter TargetName="Bd"
+                                                                Property="Background"
+                                                                Value="#D6D6D6"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </StackPanel>
+
+                                <Image Grid.Row="1"
+                                       Source="{Binding PicturePreviewImageSource}"
+                                       MaxHeight="400"
+                                       Stretch="Uniform"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Top"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+
     </Grid>
 </UserControl>
