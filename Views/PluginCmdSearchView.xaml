@@ -1,0 +1,287 @@
+<UserControl x:Class="MZResourceManager.Views.PluginCmdSearchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="280"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0"
+                BorderBrush="#D1D1D1"
+                BorderThickness="0,0,1,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0"
+                        Background="#FFFFFF"
+                        Padding="14,12"
+                        BorderBrush="#D1D1D1"
+                        BorderThickness="0,0,0,1">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Plugin Commands"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource AppColorSide2Brush}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding FilteredItems.Count, StringFormat=' ({0})'}"
+                                   FontSize="11"
+                                   Foreground="{StaticResource AppColorMain2Brush}"
+                                   VerticalAlignment="Center"
+                                   Margin="4,0,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="1"
+                        Background="White"
+                        Padding="8,8"
+                        BorderBrush="#D1D1D1"
+                        BorderThickness="0,0,0,1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="&#xE721;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="13"
+                                Foreground="#999999"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,7,0"/>
+                        <Grid Grid.Column="1">
+                            <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="6,4"
+                                    FontSize="12"
+                                     BorderBrush="#D1D1D1"
+                                    BorderThickness="1"/>
+                            <TextBlock Text="Search…"
+                                       IsHitTestVisible="False"
+                                       Foreground="#AAAAAA"
+                                    FontSize="12"
+                                       Padding="8,5"
+                                    VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility"
+                                                Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding FilterText}"
+                                                    Value="">
+                                                <Setter Property="Visibility"
+                                                        Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <ListBox Grid.Row="2"
+                         ItemsSource="{Binding FilteredItems}"
+                         SelectedItem="{Binding SelectedItem}"
+                         Background="White"
+                         BorderThickness="0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding"
+                                    Value="12,8"/>
+                            <Setter Property="BorderThickness"
+                                    Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush"
+                                    Value="#D1D1D1"/>
+                            <Setter Property="Background"
+                                    Value="White"/>
+                            <Setter Property="HorizontalContentAlignment"
+                                    Value="Stretch"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="Bd"
+                                                Padding="{TemplateBinding Padding}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                Background="{TemplateBinding Background}">
+                                            <ContentPresenter/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected"
+                                                    Value="True">
+                                                <Setter TargetName="Bd"
+                                                        Property="Background"
+                                                        Value="#0078D4"/>
+                                                <Setter Property="Foreground"
+                                                        Value="White"/>
+                                            </Trigger>
+                                            <MultiTrigger>
+                                                <MultiTrigger.Conditions>
+                                                    <Condition Property="IsMouseOver"
+                                                            Value="True"/>
+                                                    <Condition Property="IsSelected"
+                                                            Value="False"/>
+                                                </MultiTrigger.Conditions>
+                                                <Setter TargetName="Bd"
+                                                        Property="Background"
+                                                        Value="#E5F1FB"/>
+                                            </MultiTrigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Display}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Text="{Binding Sub}"
+                                           FontSize="10"
+                                           Opacity="0.65"
+                                           Margin="0,2,0,0"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Border Grid.Row="2"
+                        Background="#CCFFFFFF"
+                        Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="Scanning…"
+                               FontSize="13"
+                               Foreground="{StaticResource AppColorMain2Brush}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Status bar -->
+            <Border Grid.Row="0"
+                    Background="White"
+                    Padding="18,9"
+                    BorderBrush="#D1D1D1"
+                    BorderThickness="0,0,0,1">
+                <TextBlock Text="{Binding StatusText}"
+                           FontSize="11"
+                           Foreground="#767676"
+                           VerticalAlignment="Center"/>
+            </Border>
+
+            <TextBlock Grid.Row="1"
+                       Text="Select a command on the left to see where it is called."
+                       Foreground="#999999"
+                       FontSize="13"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Panel.ZIndex="1">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility"
+                                Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedItem}"
+                                    Value="{x:Null}">
+                                <Setter Property="Visibility"
+                                        Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+            <TabControl Grid.Row="1">
+                <TabControl.Resources>
+                    <Style TargetType="TabPanel">
+                        <Setter Property="Background"
+                                Value="#F3F3F3"/>
+                    </Style>
+                </TabControl.Resources>
+
+                <TabItem Header="Map Events">
+                    <DataGrid ItemsSource="{Binding MapCallSites}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                              IsReadOnly="True"
+                            AutoGenerateColumns="False"
+                              CanUserResizeColumns="True"
+                            CanUserSortColumns="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Map"
+                                                Binding="{Binding MapDisplay}"
+                                                Width="160"/>
+                            <DataGridTextColumn Header="Event"
+                                                Binding="{Binding EventDisplay}"
+                                                Width="160"/>
+                            <DataGridTextColumn Header="Page"
+                                                Binding="{Binding PageDisplay}"
+                                                Width="50"/>
+                            <DataGridTextColumn Header="Arguments"
+                                                Binding="{Binding Detail}"
+                                                Width="450"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+
+                <TabItem Header="Common Events">
+                    <DataGrid ItemsSource="{Binding CommonCallSites}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                              IsReadOnly="True"
+                            AutoGenerateColumns="False"
+                              CanUserResizeColumns="True"
+                            CanUserSortColumns="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID"
+                                                Binding="{Binding EventId, StringFormat=D3}"
+                                                Width="55"/>
+                            <DataGridTextColumn Header="Name"
+                                                Binding="{Binding EventName}"
+                                                Width="200"/>
+                            <DataGridTextColumn Header="Arguments"
+                                                Binding="{Binding Detail}"
+                                                Width="450"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+
+                <TabItem Header="Battle Events">
+                    <DataGrid ItemsSource="{Binding TroopCallSites}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                              IsReadOnly="True"
+                            AutoGenerateColumns="False"
+                              CanUserResizeColumns="True"
+                            CanUserSortColumns="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Troop"
+                                                Binding="{Binding TroopDisplay}"
+                                                Width="200"/>
+                            <DataGridTextColumn Header="Page"
+                                                Binding="{Binding PageDisplay}"
+                                                Width="55"/>
+                            <DataGridTextColumn Header="Arguments"
+                                                Binding="{Binding Detail}"
+                                                Width="450"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+
+            </TabControl>
+        </Grid>
+    </Grid>
+</UserControl>
