@@ -18,134 +18,202 @@
                                       Padding="20,24,20,20">
                                 <StackPanel>
 
-                                        <Grid Margin="0,0,0,6">
-                                                <TextBlock Text="MZ Resource Manager"
-                                                           FontSize="10"
-                                                           Foreground="{StaticResource AppColorMain2Brush}"
-                                                           VerticalAlignment="Center"/>
-                                                <Button Command="{Binding NavigateHomeCommand}"
-                                                        HorizontalAlignment="Right"
-                                                        Width="20"
-                                                        Height="20"
-                                                        Cursor="Hand"
-                                                        ToolTip="About / Home">
-                                                        <Button.Template>
-                                                                <ControlTemplate TargetType="Button">
-                                                                        <Border x:Name="Bd"
-                                                                                Background="Transparent"
-                                                                                BorderBrush="{StaticResource AppColorMain2Brush}"
-                                                                                BorderThickness="1"
-                                                                                CornerRadius="10">
-                                                                                <TextBlock x:Name="Lbl"
-                                                                                           Text="?"
-                                                                                           FontSize="10"
-                                                                                           FontWeight="Bold"
-                                                                                           Foreground="{StaticResource AppColorMain2Brush}"
-                                                                                           HorizontalAlignment="Center"
-                                                                                           VerticalAlignment="Center"/>
-                                                                        </Border>
-                                                                        <ControlTemplate.Triggers>
-                                                                                <Trigger Property="IsMouseOver"
-                                                                                         Value="True">
-                                                                                        <Setter TargetName="Bd"
-                                                                                                Property="Background"
-                                                                                                Value="{StaticResource AppColorMain2Brush}"/>
-                                                                                        <Setter TargetName="Lbl"
-                                                                                                Property="Foreground"
-                                                                                                Value="White"/>
-                                                                                </Trigger>
-                                                                        </ControlTemplate.Triggers>
-                                                                </ControlTemplate>
-                                                        </Button.Template>
-                                                </Button>
-                                        </Grid>
-
                                         <TextBlock Text="{Binding GameTitle}"
-                                                   FontSize="18"
+                                                   FontSize="15"
                                                    FontWeight="Bold"
                                                    Foreground="{StaticResource AppColorSide2Brush}"
                                                    TextWrapping="Wrap"
-                                                   Margin="0,0,0,6"/>
+                                                   Margin="0,0,0,4"/>
 
                                         <TextBlock Text="{Binding GameFolderDisplay}"
                                                    FontSize="10"
                                                    Foreground="{StaticResource AppColorTextBodyBrush}"
                                                    TextWrapping="Wrap"
-                                                   Margin="0,0,0,10"/>
+                                                   Margin="0,0,0,14"/>
 
-                                        <Grid Margin="0,0,0,20">
-                                                <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="8"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Button Grid.Column="0"
-                                                        Content="Open Another Folder…"
-                                                        Command="{Binding OpenProjectCommand}"
-                                                        Template="{StaticResource CtaBtn}"
-                                                        Foreground="White"
-                                                        FontSize="12"
-                                                        Height="34"
-                                                        Cursor="Hand"/>
-                                                <Button Grid.Column="2"
-                                                        Content="↺"
-                                                        Command="{Binding ReloadProjectCommand}"
-                                                        Template="{StaticResource CtaBtn}"
-                                                        Foreground="White"
-                                                        FontSize="16"
-                                                        Width="34"
-                                                        Height="34"
-                                                        Cursor="Hand"
-                                                        ToolTip="Reload project"/>
-                                        </Grid>
-
-                                        <Separator Background="{StaticResource AppColorBorderBrush}"
-                                                   Margin="0,0,0,16"/>
-
-                                        <Button Template="{StaticResource NavBtn}"
-                                                Tag="Text Search"
-                                                Content=""
-                                                Command="{Binding NavigateCommand}"
+                                        <!-- Search Text -->
+                                        <Button Command="{Binding NavigateCommand}"
                                                 CommandParameter="TextSearch"
                                                 Cursor="Hand"
-                                                Margin="0,0,0,8"/>
+                                                Margin="0,0,0,2">
+                                                <Button.Style>
+                                                        <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="Transparent"/>
+                                                                <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ActiveTabKey}" Value="TextSearch">
+                                                                                <Setter Property="Background" Value="{StaticResource NavBtnSelectedBrush}"/>
+                                                                        </DataTrigger>
+                                                                </Style.Triggers>
+                                                        </Style>
+                                                </Button.Style>
+                                                <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                                <Border x:Name="Bd"
+                                                                        Background="{TemplateBinding Background}"
+                                                                        CornerRadius="3"
+                                                                        Padding="6,5">
+                                                                        <Grid>
+                                                                                <TextBlock Text="Search Text"
+                                                                                           FontSize="12"
+                                                                                           Foreground="{StaticResource AppColorSide2Brush}"
+                                                                                           VerticalAlignment="Center"/>
+                                                                                <TextBlock Text="&#xE721;"
+                                                                                           FontFamily="Segoe MDL2 Assets"
+                                                                                           FontSize="11"
+                                                                                           Foreground="{StaticResource AppColorTextMutedBrush}"
+                                                                                           HorizontalAlignment="Right"
+                                                                                           VerticalAlignment="Center"/>
+                                                                        </Grid>
+                                                                </Border>
+                                                                <ControlTemplate.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource AppColorSideLightHoverBrush}"/>
+                                                                        </Trigger>
+                                                                </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                </Button.Template>
+                                        </Button>
+
+                                        <!-- Plugin Command Search -->
+                                        <Button Command="{Binding NavigateCommand}"
+                                                CommandParameter="PluginCmdSearch"
+                                                Cursor="Hand"
+                                                Margin="0,0,0,4">
+                                                <Button.Style>
+                                                        <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="Transparent"/>
+                                                                <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ActiveTabKey}" Value="PluginCmdSearch">
+                                                                                <Setter Property="Background" Value="{StaticResource NavBtnSelectedBrush}"/>
+                                                                        </DataTrigger>
+                                                                </Style.Triggers>
+                                                        </Style>
+                                                </Button.Style>
+                                                <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                                <Border x:Name="Bd"
+                                                                        Background="{TemplateBinding Background}"
+                                                                        CornerRadius="3"
+                                                                        Padding="6,5">
+                                                                        <Grid>
+                                                                                <TextBlock Text="Plugin Commands"
+                                                                                           FontSize="12"
+                                                                                           Foreground="{StaticResource AppColorSide2Brush}"
+                                                                                           VerticalAlignment="Center"/>
+                                                                                <TextBlock Text="&#xE8A9;"
+                                                                                           FontFamily="Segoe MDL2 Assets"
+                                                                                           FontSize="11"
+                                                                                           Foreground="{StaticResource AppColorTextMutedBrush}"
+                                                                                           HorizontalAlignment="Right"
+                                                                                           VerticalAlignment="Center"/>
+                                                                        </Grid>
+                                                                </Border>
+                                                                <ControlTemplate.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource AppColorSideLightHoverBrush}"/>
+                                                                        </Trigger>
+                                                                </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                </Button.Template>
+                                        </Button>
 
                                         <Separator Background="{StaticResource AppColorBorderBrush}"
-                                                   Margin="0,0,0,16"/>
+                                                   Margin="0,12,0,16"/>
+
+                                        <TextBlock Text="DATABASE"
+                                                   FontSize="9"
+                                                   FontWeight="Bold"
+                                                   Foreground="{StaticResource AppColorMain2Brush}"
+                                                   Margin="0,0,0,6"/>
 
                                         <Button Template="{StaticResource NavBtn}"
                                                 Tag="Maps"
                                                 Content="{Binding MapCount}"
                                                 Command="{Binding NavigateCommand}"
                                                 CommandParameter="Maps"
-                                                Cursor="Hand"/>
+                                                Cursor="Hand">
+                                                <Button.Style>
+                                                        <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="Transparent"/>
+                                                                <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ActiveTabKey}" Value="Maps">
+                                                                                <Setter Property="Background" Value="{StaticResource NavBtnSelectedBrush}"/>
+                                                                        </DataTrigger>
+                                                                </Style.Triggers>
+                                                        </Style>
+                                                </Button.Style>
+                                        </Button>
                                         <Button Template="{StaticResource NavBtn}"
                                                 Tag="Items"
                                                 Content="{Binding ItemCount}"
                                                 Command="{Binding NavigateCommand}"
                                                 CommandParameter="Items"
-                                                Cursor="Hand"/>
+                                                Cursor="Hand">
+                                                <Button.Style>
+                                                        <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="Transparent"/>
+                                                                <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ActiveTabKey}" Value="Items">
+                                                                                <Setter Property="Background" Value="{StaticResource NavBtnSelectedBrush}"/>
+                                                                        </DataTrigger>
+                                                                </Style.Triggers>
+                                                        </Style>
+                                                </Button.Style>
+                                        </Button>
                                         <Button Template="{StaticResource NavBtn}"
                                                 Tag="Switches"
                                                 Content="{Binding SwitchCount}"
                                                 Command="{Binding NavigateCommand}"
                                                 CommandParameter="Switches"
-                                                Cursor="Hand"/>
+                                                Cursor="Hand">
+                                                <Button.Style>
+                                                        <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="Transparent"/>
+                                                                <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ActiveTabKey}" Value="Switches">
+                                                                                <Setter Property="Background" Value="{StaticResource NavBtnSelectedBrush}"/>
+                                                                        </DataTrigger>
+                                                                </Style.Triggers>
+                                                        </Style>
+                                                </Button.Style>
+                                        </Button>
                                         <Button Template="{StaticResource NavBtn}"
                                                 Tag="Variables"
                                                 Content="{Binding VariableCount}"
                                                 Command="{Binding NavigateCommand}"
                                                 CommandParameter="Variables"
-                                                Cursor="Hand"/>
+                                                Cursor="Hand">
+                                                <Button.Style>
+                                                        <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="Transparent"/>
+                                                                <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ActiveTabKey}" Value="Variables">
+                                                                                <Setter Property="Background" Value="{StaticResource NavBtnSelectedBrush}"/>
+                                                                        </DataTrigger>
+                                                                </Style.Triggers>
+                                                        </Style>
+                                                </Button.Style>
+                                        </Button>
                                         <Button Template="{StaticResource NavBtn}"
                                                 Tag="Common Events"
                                                 Content="{Binding CommonEventCount}"
                                                 Command="{Binding NavigateCommand}"
                                                 CommandParameter="CommonEvents"
-                                                Cursor="Hand"/>
+                                                Cursor="Hand">
+                                                <Button.Style>
+                                                        <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="Transparent"/>
+                                                                <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ActiveTabKey}" Value="CommonEvents">
+                                                                                <Setter Property="Background" Value="{StaticResource NavBtnSelectedBrush}"/>
+                                                                        </DataTrigger>
+                                                                </Style.Triggers>
+                                                        </Style>
+                                                </Button.Style>
+                                        </Button>
 
                                         <Separator Background="{StaticResource AppColorBorderBrush}"
-                                                   Margin="0,16,0,12"/>
+                                                   Margin="0,12,0,16"/>
 
                                         <TextBlock Text="RESOURCES"
                                                    FontSize="9"
@@ -158,48 +226,121 @@
                                                 Content="{Binding AudioCount}"
                                                 Command="{Binding NavigateCommand}"
                                                 CommandParameter="ResAudio"
-                                                Cursor="Hand"/>
+                                                Cursor="Hand">
+                                                <Button.Style>
+                                                        <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="Transparent"/>
+                                                                <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ActiveTabKey}" Value="ResAudio">
+                                                                                <Setter Property="Background" Value="{StaticResource NavBtnSelectedBrush}"/>
+                                                                        </DataTrigger>
+                                                                </Style.Triggers>
+                                                        </Style>
+                                                </Button.Style>
+                                        </Button>
+                                        <Button Template="{StaticResource NavBtn}"
+                                                Tag="Sprites"
+                                                Content="{Binding SpriteCount}"
+                                                Command="{Binding NavigateCommand}"
+                                                CommandParameter="ResSprites"
+                                                Cursor="Hand">
+                                                <Button.Style>
+                                                        <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="Transparent"/>
+                                                                <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ActiveTabKey}" Value="ResSprites">
+                                                                                <Setter Property="Background" Value="{StaticResource NavBtnSelectedBrush}"/>
+                                                                        </DataTrigger>
+                                                                </Style.Triggers>
+                                                        </Style>
+                                                </Button.Style>
+                                        </Button>
+                                        <Button Template="{StaticResource NavBtn}"
+                                                Tag="Animations"
+                                                Content="{Binding AnimCount}"
+                                                Command="{Binding NavigateCommand}"
+                                                CommandParameter="ResAnimations"
+                                                Cursor="Hand">
+                                                <Button.Style>
+                                                        <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="Transparent"/>
+                                                                <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ActiveTabKey}" Value="ResAnimations">
+                                                                                <Setter Property="Background" Value="{StaticResource NavBtnSelectedBrush}"/>
+                                                                        </DataTrigger>
+                                                                </Style.Triggers>
+                                                        </Style>
+                                                </Button.Style>
+                                        </Button>
+                                        <Button Template="{StaticResource NavBtn}"
+                                                Tag="Backgrounds"
+                                                Content="{Binding BgCount}"
+                                                Command="{Binding NavigateCommand}"
+                                                CommandParameter="ResBackgrounds"
+                                                Cursor="Hand">
+                                                <Button.Style>
+                                                        <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="Transparent"/>
+                                                                <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ActiveTabKey}" Value="ResBackgrounds">
+                                                                                <Setter Property="Background" Value="{StaticResource NavBtnSelectedBrush}"/>
+                                                                        </DataTrigger>
+                                                                </Style.Triggers>
+                                                        </Style>
+                                                </Button.Style>
+                                        </Button>
                                         <Button Template="{StaticResource NavBtn}"
                                                 Tag="Pictures"
                                                 Content="{Binding PictureCount}"
                                                 Command="{Binding NavigateCommand}"
                                                 CommandParameter="ResPictures"
-                                                Cursor="Hand"/>
+                                                Cursor="Hand">
+                                                <Button.Style>
+                                                        <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="Transparent"/>
+                                                                <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ActiveTabKey}" Value="ResPictures">
+                                                                                <Setter Property="Background" Value="{StaticResource NavBtnSelectedBrush}"/>
+                                                                        </DataTrigger>
+                                                                </Style.Triggers>
+                                                        </Style>
+                                                </Button.Style>
+                                        </Button>
+                                        <Button Template="{StaticResource NavBtn}"
+                                                Tag="System / UI"
+                                                Content="{Binding SystemUICount}"
+                                                Command="{Binding NavigateCommand}"
+                                                CommandParameter="ResSystemUI"
+                                                Cursor="Hand">
+                                                <Button.Style>
+                                                        <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="Transparent"/>
+                                                                <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ActiveTabKey}" Value="ResSystemUI">
+                                                                                <Setter Property="Background" Value="{StaticResource NavBtnSelectedBrush}"/>
+                                                                        </DataTrigger>
+                                                                </Style.Triggers>
+                                                        </Style>
+                                                </Button.Style>
+                                        </Button>
                                         <Button Template="{StaticResource NavBtn}"
                                                 Tag="Tilesets"
                                                 Content="{Binding TilesetCount}"
                                                 Command="{Binding NavigateCommand}"
                                                 CommandParameter="TilesetAnalyze"
-                                                Cursor="Hand"/>
+                                                Cursor="Hand">
+                                                <Button.Style>
+                                                        <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="Transparent"/>
+                                                                <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ActiveTabKey}" Value="TilesetAnalyze">
+                                                                                <Setter Property="Background" Value="{StaticResource NavBtnSelectedBrush}"/>
+                                                                        </DataTrigger>
+                                                                </Style.Triggers>
+                                                        </Style>
+                                                </Button.Style>
+                                        </Button>
 
-                                        <Separator Background="{StaticResource AppColorBorderBrush}"
-                                                   Margin="0,16,0,12"/>
-
-                                        <TextBlock Text="TOOLS"
-                                                   FontSize="9"
-                                                   FontWeight="Bold"
-                                                   Foreground="{StaticResource AppColorMain2Brush}"
-                                                   Margin="0,0,0,8"/>
-
-                                        <Button Content="Unused Resource Scan"
-                                                Command="{Binding NavigateCommand}"
-                                                CommandParameter="UnusedResources"
-                                                Template="{StaticResource CtaBtn}"
-                                                Foreground="White"
-                                                FontSize="11"
-                                                Height="30"
-                                                Cursor="Hand"
-                                                Margin="0,0,0,6"/>
-
-                                        <Button Content="Script Book Export"
-                                                Command="{Binding NavigateCommand}"
-                                                CommandParameter="ScriptBookExport"
-                                                Template="{StaticResource CtaBtn}"
-                                                Foreground="White"
-                                                FontSize="11"
-                                                Height="30"
-                                                Cursor="Hand"
-                                                Margin="0,0,0,0"/>
 
                                 </StackPanel>
                         </ScrollViewer>
@@ -222,24 +363,19 @@
                                 Visibility="{Binding DataContext.ShowNamedList,
                                              RelativeSource={RelativeSource AncestorType=Grid},
                                              Converter={StaticResource BoolToVis}}"/>
-                        <views:UnusedResourcesView
-                                DataContext="{Binding UnusedResources}"
-                                Visibility="{Binding DataContext.ShowUnusedResources,
-                                             RelativeSource={RelativeSource AncestorType=Grid},
-                                             Converter={StaticResource BoolToVis}}"/>
                         <views:TilesetAnalyzeView
                                 DataContext="{Binding TilesetAnalyze}"
                                 Visibility="{Binding DataContext.ShowTilesetAnalyze,
                                              RelativeSource={RelativeSource AncestorType=Grid},
                                              Converter={StaticResource BoolToVis}}"/>
-                        <views:ScriptBookExportView
-                                DataContext="{Binding ScriptBookExport}"
-                                Visibility="{Binding DataContext.ShowScriptBookExport,
-                                             RelativeSource={RelativeSource AncestorType=Grid},
-                                             Converter={StaticResource BoolToVis}}"/>
                         <views:TextSearchView
                                 DataContext="{Binding TextSearch}"
                                 Visibility="{Binding DataContext.ShowTextSearch,
+                                             RelativeSource={RelativeSource AncestorType=Grid},
+                                             Converter={StaticResource BoolToVis}}"/>
+                        <views:PluginCmdSearchView
+                                DataContext="{Binding PluginCmdSearch}"
+                                Visibility="{Binding DataContext.ShowPluginCmdSearch,
                                              RelativeSource={RelativeSource AncestorType=Grid},
                                              Converter={StaticResource BoolToVis}}"/>
                 </Grid>

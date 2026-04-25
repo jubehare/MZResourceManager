@@ -20,6 +20,8 @@
                      Color="{StaticResource AppColorSideLight}"/>
     <SolidColorBrush x:Key="AppColorSideLightHoverBrush"
                      Color="{StaticResource AppColorSideLightHover}"/>
+    <SolidColorBrush x:Key="NavBtnSelectedBrush"
+                     Color="#D8D8D8"/>
 
     <!-- Text -->
     <Color x:Key="AppColorTextMuted">#767676</Color>

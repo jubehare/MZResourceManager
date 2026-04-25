@@ -36,7 +36,7 @@
     <ControlTemplate x:Key="NavBtn"
                      TargetType="Button">
         <Border x:Name="Bd"
-                Background="Transparent"
+                Background="{TemplateBinding Background}"
                 CornerRadius="3"
                 Padding="6,7">
             <Grid>

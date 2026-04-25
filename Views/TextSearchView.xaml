@@ -19,13 +19,29 @@
                     <ColumnDefinition Width="8"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0"
-                         x:Name="QueryBox"
-                         Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                         FontSize="13"
-                         Padding="8,6"
-                         VerticalContentAlignment="Center"
-                         KeyDown="QueryBox_KeyDown"/>
+                <Grid Grid.Column="0">
+                    <TextBox x:Name="QueryBox"
+                             Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                             FontSize="13"
+                             Padding="8,6"
+                             VerticalContentAlignment="Center"
+                             KeyDown="QueryBox_KeyDown"/>
+                    <TextBlock Text="Enter keyword to search across all events and plugin data…"
+                               IsHitTestVisible="False"
+                               Foreground="#AAAAAA" FontSize="12"
+                               Padding="10,7" VerticalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SearchQuery}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
                 <Button Grid.Column="2"
                         Content="Search"
                         Command="{Binding SearchCommand}"
@@ -60,7 +76,8 @@
         <TabControl Grid.Row="2">
 
             <TabItem Header="Map Events">
-                <DataGrid ItemsSource="{Binding MapResults}">
+                <DataGrid ItemsSource="{Binding MapResults}"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Map"
                                             Binding="{Binding MapDisplay}"
@@ -76,13 +93,14 @@
                                             Width="130"/>
                         <DataGridTextColumn Header="Matched Text"
                                             Binding="{Binding MatchedText}"
-                                            Width="*"/>
+                                            Width="350"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>
 
             <TabItem Header="Common Events">
-                <DataGrid ItemsSource="{Binding CommonResults}">
+                <DataGrid ItemsSource="{Binding CommonResults}"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Common Event"
                                             Binding="{Binding EventDisplay}"
@@ -92,7 +110,44 @@
                                             Width="130"/>
                         <DataGridTextColumn Header="Matched Text"
                                             Binding="{Binding MatchedText}"
-                                            Width="*"/>
+                                            Width="350"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+            <TabItem Header="Battle Events">
+                <DataGrid ItemsSource="{Binding TroopResults}"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Troop"
+                                            Binding="{Binding MapDisplay}"
+                                            Width="200"/>
+                        <DataGridTextColumn Header="Page"
+                                            Binding="{Binding EventDisplay}"
+                                            Width="80"/>
+                        <DataGridTextColumn Header="Type"
+                                            Binding="{Binding CommandType}"
+                                            Width="130"/>
+                        <DataGridTextColumn Header="Matched Text"
+                                            Binding="{Binding MatchedText}"
+                                            Width="350"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+            <TabItem Header="Plugin Settings">
+                <DataGrid ItemsSource="{Binding PluginResults}"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Plugin"
+                                            Binding="{Binding PluginName}"
+                                            Width="200"/>
+                        <DataGridTextColumn Header="Parameter"
+                                            Binding="{Binding ParamKey}"
+                                            Width="250"/>
+                        <DataGridTextColumn Header="Value"
+                                            Binding="{Binding ParamValue}"
+                                            Width="350"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>

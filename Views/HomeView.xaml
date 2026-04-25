@@ -71,6 +71,24 @@
 
             </UniformGrid>
 
+            <Separator Background="{StaticResource AppColorBorderBrush}"
+                       Margin="0,0,0,20"/>
+
+            <StackPanel HorizontalAlignment="Center">
+                <TextBlock FontSize="12"
+                           Foreground="{StaticResource AppColorTextMutedBrush}"
+                           HorizontalAlignment="Center">
+                    <Hyperlink Command="{Binding OpenGitHubCommand}">
+                        View on GitHub
+                    </Hyperlink>
+                </TextBlock>
+                <TextBlock Text="Developed by Jube Hare  ·  MIT License"
+                           FontSize="11"
+                           Foreground="{StaticResource AppColorTextMutedBrush}"
+                           HorizontalAlignment="Center"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+
         </StackPanel>
     </ScrollViewer>
 </UserControl>

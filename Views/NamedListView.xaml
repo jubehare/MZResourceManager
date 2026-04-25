@@ -42,11 +42,38 @@
                         Padding="8,8"
                         BorderBrush="#D1D1D1"
                         BorderThickness="0,0,0,1">
-                    <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
-                             Padding="6,4"
-                             FontSize="12"
-                             BorderBrush="#D1D1D1"
-                             BorderThickness="1"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="&#xE721;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="13" Foreground="#999999"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,7,0"/>
+                        <Grid Grid.Column="1">
+                            <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="6,4" FontSize="12"
+                                     BorderBrush="#D1D1D1" BorderThickness="1"/>
+                            <TextBlock Text="Search…"
+                                       IsHitTestVisible="False"
+                                       Foreground="#AAAAAA" FontSize="12"
+                                       Padding="8,5" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding FilterText}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </Grid>
                 </Border>
 
                 <ListBox Grid.Row="2"
@@ -404,6 +431,22 @@
                             <DataGridTextColumn Header="Name"
                                                 Binding="{Binding EventName}"
                                                 Width="200"/>
+                            <DataGridTextColumn Header="Detail"
+                                                Binding="{Binding Detail}"
+                                                Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+
+                <TabItem Header="Battle Events">
+                    <DataGrid ItemsSource="{Binding TroopResults}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Troop"
+                                                Binding="{Binding TroopDisplay}"
+                                                Width="200"/>
+                            <DataGridTextColumn Header="Page"
+                                                Binding="{Binding PageDisplay}"
+                                                Width="60"/>
                             <DataGridTextColumn Header="Detail"
                                                 Binding="{Binding Detail}"
                                                 Width="*"/>
