@@ -2,6 +2,8 @@
 
 A read-only analysis and inspection tool for **RPG Maker MZ** game projects. Browse your game's database and resources, check where switches, variables, and files are used.
 
+![MZ Resource Manager screenshot](screenshot.png)
+
 ---
 
 ## Requirements
