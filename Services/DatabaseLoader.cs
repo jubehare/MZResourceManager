@@ -25,24 +25,29 @@ public class DatabaseLoader
         db.TileSize = system.Advanced.TileSize > 0 ? system.Advanced.TileSize : 48;
         db.Switches = BuildNamedList(system.Switches);
         db.Variables = BuildNamedList(system.Variables);
-        db.Plugins = system.Plugins.Where(p => p.Status).ToList();
         db.System = system;
+
+        progress?.Report("Loading plugins…");
+        db.Plugins = await LoadPluginsAsync(gameFolder, ct);
+        LoadPluginParamTypes(db.Plugins, gameFolder);
 
         progress?.Report("Loading database…");
         var itemsTask = LoadNullableListAsync<MzItem>(Path.Combine(dataDir, "Items.json"), ct);
         var weaponsTask = LoadNamedListAsync(Path.Combine(dataDir, "Weapons.json"), ct);
         var armorsTask = LoadNamedListAsync(Path.Combine(dataDir, "Armors.json"), ct);
         var actorsTask = LoadNamedListAsync(Path.Combine(dataDir, "Actors.json"), ct);
+        var actorDetailsTask = LoadNullableListAsync<MzActor>(Path.Combine(dataDir, "Actors.json"), ct);
         var classesTask = LoadNamedListAsync(Path.Combine(dataDir, "Classes.json"), ct);
         var skillsTask = LoadNamedListAsync(Path.Combine(dataDir, "Skills.json"), ct);
         var statesTask = LoadNamedListAsync(Path.Combine(dataDir, "States.json"), ct);
         var enemiesTask = LoadNamedListAsync(Path.Combine(dataDir, "Enemies.json"), ct);
-        await Task.WhenAll(itemsTask, weaponsTask, armorsTask, actorsTask, classesTask, skillsTask, statesTask, enemiesTask);
+        await Task.WhenAll(itemsTask, weaponsTask, armorsTask, actorsTask, actorDetailsTask, classesTask, skillsTask, statesTask, enemiesTask);
         db.ItemDetails = await itemsTask;
         db.Items = db.ItemDetails.Select(i => i.ToNamedEntry()).ToList();
         db.Weapons = await weaponsTask;
         db.Armors = await armorsTask;
         db.Actors = await actorsTask;
+        db.ActorDetails = await actorDetailsTask;
         db.Classes = await classesTask;
         db.Skills = await skillsTask;
         db.States = await statesTask;
@@ -95,6 +100,35 @@ public class DatabaseLoader
 
         var results = await Task.WhenAll(tasks);
         return results.ToDictionary(r => r.id, r => r.map);
+    }
+
+    private async Task<List<MzPlugin>> LoadPluginsAsync(string gameFolder, CancellationToken ct)
+    {
+        var path = Path.Combine(gameFolder, "js", "plugins.js");
+        if (!File.Exists(path)) return [];
+        try
+        {
+            var content = await File.ReadAllTextAsync(path, System.Text.Encoding.UTF8, ct);
+            var start = content.IndexOf('[');
+            if (start < 0) return [];
+            var json = content[start..].TrimEnd().TrimEnd(';');
+            var all = JsonSerializer.Deserialize<List<MzPlugin>>(json, JsonOpts) ?? [];
+            return all.Where(p => p.Status).ToList();
+        }
+        catch { return []; }
+    }
+
+    private static void LoadPluginParamTypes(List<MzPlugin> plugins, string gameFolder)
+    {
+        var pluginsDir = Path.Combine(gameFolder, "js", "plugins");
+        if (!Directory.Exists(pluginsDir)) return;
+
+        foreach (var plugin in plugins)
+        {
+            var jsPath = Path.Combine(pluginsDir, plugin.Name + ".js");
+            if (File.Exists(jsPath))
+                plugin.ParamTypes = PluginParamParser.ParseParamTypes(jsPath);
+        }
     }
 
     private static List<NamedEntry> BuildNamedList(string[] names)
