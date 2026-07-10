@@ -15,8 +15,8 @@ public enum ActiveTab
 {
     None,
     Maps, Items, Switches, Variables, CommonEvents,
-    ResAudio, ResPictures,
-    UnusedResources, TilesetAnalyze, ScriptBookExport, TextSearch
+    ResAudio, ResPictures, ResSprites, ResAnimations, ResBackgrounds, ResSystemUI,
+    TilesetAnalyze, TextSearch, PluginCmdSearch
 }
 
 public partial class MainViewModel : ObservableObject
@@ -29,6 +29,8 @@ public partial class MainViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(ShowWelcome))]
     [NotifyPropertyChangedFor(nameof(ShowHome))]
     [NotifyCanExecuteChangedFor(nameof(ReloadProjectCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpenUnusedScanCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpenScriptBookCommand))]
     private bool _projectLoaded;
 
     [ObservableProperty] private string _loadStatus = string.Empty;
@@ -42,29 +44,36 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty] private int _audioCount;
     [ObservableProperty] private int _pictureCount;
+    [ObservableProperty] private int _spriteCount;
+    [ObservableProperty] private int _animCount;
+    [ObservableProperty] private int _bgCount;
+    [ObservableProperty] private int _systemUICount;
     [ObservableProperty] private int _tilesetCount;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowMaps))]
     [NotifyPropertyChangedFor(nameof(ShowResourceSearch))]
     [NotifyPropertyChangedFor(nameof(ShowNamedList))]
-    [NotifyPropertyChangedFor(nameof(ShowUnusedResources))]
     [NotifyPropertyChangedFor(nameof(ShowTilesetAnalyze))]
-    [NotifyPropertyChangedFor(nameof(ShowScriptBookExport))]
     [NotifyPropertyChangedFor(nameof(ShowTextSearch))]
+    [NotifyPropertyChangedFor(nameof(ShowPluginCmdSearch))]
     [NotifyPropertyChangedFor(nameof(ShowHome))]
+    [NotifyPropertyChangedFor(nameof(ActiveTabKey))]
     private ActiveTab _activeTab = ActiveTab.None;
+
+    public string ActiveTabKey => ActiveTab.ToString();
 
     public bool ShowWelcome => !ProjectLoaded && !IsLoading;
     public bool ShowHome => ProjectLoaded && ActiveTab == ActiveTab.None;
     public bool ShowMaps => ActiveTab == ActiveTab.Maps;
-    public bool ShowResourceSearch => ActiveTab is ActiveTab.ResAudio or ActiveTab.ResPictures;
+    public bool ShowResourceSearch => ActiveTab is
+        ActiveTab.ResAudio or ActiveTab.ResPictures or ActiveTab.ResSprites or
+        ActiveTab.ResAnimations or ActiveTab.ResBackgrounds or ActiveTab.ResSystemUI;
     public bool ShowNamedList => ActiveTab is
         ActiveTab.Items or ActiveTab.Switches or ActiveTab.Variables or ActiveTab.CommonEvents;
-    public bool ShowUnusedResources => ActiveTab == ActiveTab.UnusedResources;
-    public bool ShowTilesetAnalyze => ActiveTab == ActiveTab.TilesetAnalyze;
-    public bool ShowScriptBookExport => ActiveTab == ActiveTab.ScriptBookExport;
-    public bool ShowTextSearch => ActiveTab == ActiveTab.TextSearch;
+    public bool ShowTilesetAnalyze  => ActiveTab == ActiveTab.TilesetAnalyze;
+    public bool ShowTextSearch      => ActiveTab == ActiveTab.TextSearch;
+    public bool ShowPluginCmdSearch => ActiveTab == ActiveTab.PluginCmdSearch;
 
     [RelayCommand]
     private void NavigateHome() => ActiveTab = ActiveTab.None;
@@ -76,11 +85,12 @@ public partial class MainViewModel : ObservableObject
             await LoadProjectAsync(folder);
     }
 
-    public ResourceSearchViewModel ResourceSearch { get; } = new();
+    public ResourceSearchViewModel  ResourceSearch  { get; } = new();
     public UnusedResourcesViewModel UnusedResources { get; } = new();
-    public TilesetAnalyzeViewModel TilesetAnalyze { get; } = new();
+    public TilesetAnalyzeViewModel  TilesetAnalyze  { get; } = new();
     public ScriptBookExportViewModel ScriptBookExport { get; } = new();
-    public TextSearchViewModel TextSearch { get; } = new();
+    public TextSearchViewModel      TextSearch       { get; } = new();
+    public PluginCmdSearchViewModel PluginCmdSearch  { get; } = new();
 
     private readonly NamedListViewModel _switchList = new();
     private readonly NamedListViewModel _variableList = new();
@@ -113,6 +123,7 @@ public partial class MainViewModel : ObservableObject
 
     public ObservableCollection<Models.MapEventUsage> MapTransferResults { get; } = [];
     public ObservableCollection<Models.CommonEventUsage> CommonTransferResults { get; } = [];
+    public ObservableCollection<Models.TroopEventUsage> TroopTransferResults { get; } = [];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanExportMap))]
@@ -171,6 +182,7 @@ public partial class MainViewModel : ObservableObject
     {
         MapTransferResults.Clear();
         CommonTransferResults.Clear();
+        TroopTransferResults.Clear();
 
         if (map == null || _db == null)
         {
@@ -185,16 +197,17 @@ public partial class MainViewModel : ObservableObject
         {
             var db = _db;
             var mapId = map.Id;
-            var (mapR, commonR) = await Task.Run(() =>
+            var (mapR, commonR, troopR) = await Task.Run(() =>
                 Services.DatabaseEntrySearcher.SearchMapTransfers(db, mapId));
 
-            foreach (var r in mapR) MapTransferResults.Add(r);
+            foreach (var r in mapR)    MapTransferResults.Add(r);
             foreach (var r in commonR) CommonTransferResults.Add(r);
+            foreach (var r in troopR)  TroopTransferResults.Add(r);
 
-            int total = mapR.Count + commonR.Count;
+            int total = mapR.Count + commonR.Count + troopR.Count;
             TransferStatusText = total == 0
                 ? $"No teleport events point to \"{map.Name}\"."
-                : $"{mapR.Count} map event(s)  |  {commonR.Count} common event(s)";
+                : $"{mapR.Count} map event(s)  |  {commonR.Count} common event(s)  |  {troopR.Count} battle event(s)";
         }
         catch (Exception ex)
         {
@@ -321,20 +334,29 @@ public partial class MainViewModel : ObservableObject
             "Switches" => ActiveTab.Switches,
             "Variables" => ActiveTab.Variables,
             "CommonEvents" => ActiveTab.CommonEvents,
-            "ResAudio" => ActiveTab.ResAudio,
-            "ResPictures" => ActiveTab.ResPictures,
-            "UnusedResources" => ActiveTab.UnusedResources,
-            "TilesetAnalyze" => ActiveTab.TilesetAnalyze,
-            "ScriptBookExport" => ActiveTab.ScriptBookExport,
-            "TextSearch" => ActiveTab.TextSearch,
+            "ResAudio"       => ActiveTab.ResAudio,
+            "ResPictures"    => ActiveTab.ResPictures,
+            "ResSprites"     => ActiveTab.ResSprites,
+            "ResAnimations"  => ActiveTab.ResAnimations,
+            "ResBackgrounds" => ActiveTab.ResBackgrounds,
+            "ResSystemUI"    => ActiveTab.ResSystemUI,
+            "TilesetAnalyze"  => ActiveTab.TilesetAnalyze,
+            "TextSearch"      => ActiveTab.TextSearch,
+            "PluginCmdSearch" => ActiveTab.PluginCmdSearch,
             _ => ActiveTab.None,
         };
 
         if (_db != null && ShowResourceSearch)
         {
-            var category = ActiveTab == ActiveTab.ResPictures
-                ? ResourceCategory.Pictures
-                : ResourceCategory.Audio;
+            var category = ActiveTab switch
+            {
+                ActiveTab.ResPictures    => ResourceCategory.Pictures,
+                ActiveTab.ResSprites     => ResourceCategory.Sprites,
+                ActiveTab.ResAnimations  => ResourceCategory.Animations,
+                ActiveTab.ResBackgrounds => ResourceCategory.Backgrounds,
+                ActiveTab.ResSystemUI    => ResourceCategory.SystemUI,
+                _                        => ResourceCategory.Audio,
+            };
             ResourceSearch.Initialize(_db, category);
         }
 
@@ -351,6 +373,45 @@ public partial class MainViewModel : ObservableObject
         _ => _switchList,
     };
 
+    [RelayCommand]
+    private void Exit() => System.Windows.Application.Current.Shutdown();
+
+    // ── Tool overlay ──────────────────────────────────────────────────────────
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasOverlay))]
+    [NotifyPropertyChangedFor(nameof(OverlayTitle))]
+    private object? _overlayContent;
+
+    public bool   HasOverlay   => OverlayContent != null;
+    public string OverlayTitle => OverlayContent switch
+    {
+        UnusedResourcesViewModel  => "Unused Resource Scan",
+        ScriptBookExportViewModel => "Script Book Export",
+        _                         => string.Empty,
+    };
+
+    [RelayCommand]
+    private void CloseOverlay() => OverlayContent = null;
+
+    [RelayCommand(CanExecute = nameof(ProjectLoaded))]
+    private void OpenUnusedScan()
+    {
+        OverlayContent = UnusedResources;
+        if (UnusedResources.ScanCommand.CanExecute(null))
+            UnusedResources.ScanCommand.Execute(null);
+    }
+
+    [RelayCommand(CanExecute = nameof(ProjectLoaded))]
+    private void OpenScriptBook() => OverlayContent = ScriptBookExport;
+
+    [RelayCommand]
+    private void OpenGitHub()
+    {
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(
+            "https://github.com/jubehare/MZResourceManager") { UseShellExecute = true });
+    }
+
     private void ScanResources(string folder)
     {
         static int Count(string dir, SearchOption opt = SearchOption.TopDirectoryOnly) =>
@@ -359,11 +420,18 @@ public partial class MainViewModel : ObservableObject
                            .Count(f => !Path.GetFileName(f).StartsWith('.'))
                 : 0;
 
-        var audio = Path.Combine(folder, "audio");
-        var img = Path.Combine(folder, "img");
+        static int CountDirs(string imgRoot, string[] subs) =>
+            subs.Sum(d => Count(Path.Combine(imgRoot, d)));
 
-        AudioCount = Count(audio, SearchOption.AllDirectories);
+        var audio = Path.Combine(folder, "audio");
+        var img   = Path.Combine(folder, "img");
+
+        AudioCount   = Count(audio, SearchOption.AllDirectories);
         PictureCount = Count(Path.Combine(img, "pictures"), SearchOption.AllDirectories);
+        SpriteCount  = CountDirs(img, ["characters", "faces", "sv_actors", "sv_enemies", "battlers"]);
+        AnimCount    = Count(Path.Combine(img, "animations"));
+        BgCount      = CountDirs(img, ["parallaxes", "battlebacks1", "battlebacks2", "titles1", "titles2"]);
+        SystemUICount = CountDirs(img, ["system", "icons"]);
     }
 
     private async Task LoadProjectAsync(string folder)
@@ -400,6 +468,7 @@ public partial class MainViewModel : ObservableObject
             TilesetAnalyze.Initialize(_db);
             ScriptBookExport.Initialize(_db);
             TextSearch.Initialize(_db);
+            PluginCmdSearch.Initialize(_db);
 
             _switchList.Initialize(_db, "Switches",
                 _db.Switches, Services.EntryKind.Switch);

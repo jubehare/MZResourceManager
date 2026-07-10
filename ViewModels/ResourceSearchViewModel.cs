@@ -7,6 +7,13 @@ using MZResourceManager.Services;
 
 namespace MZResourceManager.ViewModels;
 
+public partial class SubFolderOption : ObservableObject
+{
+    public string Name { get; }
+    [ObservableProperty] private bool _isSelected;
+    public SubFolderOption(string name) => Name = name;
+}
+
 public partial class ResourceSearchViewModel : ObservableObject
 {
     private GameDatabase? _db;
@@ -25,6 +32,7 @@ public partial class ResourceSearchViewModel : ObservableObject
     [ObservableProperty] private string? _audioFilePath;
     [ObservableProperty] private string _audioTypeLabel = string.Empty;
 
+    [ObservableProperty] private string? _imageFilePath;
     [ObservableProperty] private bool _isSearching;
     [ObservableProperty] private string _statusText = string.Empty;
 
@@ -32,10 +40,12 @@ public partial class ResourceSearchViewModel : ObservableObject
     public bool ShowAudioPreview => IsAudioCategory && SelectedEntry != null;
     public bool ShowImagePreview => IsImageCategory && SelectedEntry != null;
 
-    public ObservableCollection<string> SubFolderOptions { get; } = [];
+    public ObservableCollection<SubFolderOption> SubFolderOptions { get; } = [];
     public ObservableCollection<ResourceEntry> FilteredEntries { get; } = [];
     public ObservableCollection<MapEventUsage> MapResults { get; } = [];
     public ObservableCollection<CommonEventUsage> CommonResults { get; } = [];
+    public ObservableCollection<TroopEventUsage> TroopResults { get; } = [];
+    public ObservableCollection<ResourcePluginCmdUsage> PluginCmdResults { get; } = [];
 
     public void Initialize(GameDatabase db, ResourceCategory category)
     {
@@ -43,16 +53,24 @@ public partial class ResourceSearchViewModel : ObservableObject
         _category = category;
 
         IsAudioCategory = category == ResourceCategory.Audio;
-        IsImageCategory = category == ResourceCategory.Pictures;
+        IsImageCategory = category != ResourceCategory.Audio;
 
-        CategoryTitle = category == ResourceCategory.Audio ? "Audio" : "Pictures";
+        CategoryTitle = category switch
+        {
+            ResourceCategory.Audio       => "Audio",
+            ResourceCategory.Sprites     => "Sprites",
+            ResourceCategory.Animations  => "Animations",
+            ResourceCategory.Backgrounds => "Backgrounds",
+            ResourceCategory.SystemUI    => "System / UI",
+            _                            => "Pictures",
+        };
 
         _allEntries = ResourceSearcher.GetCategoryEntries(db.GameFolder, category);
 
         SubFolderOptions.Clear();
-        SubFolderOptions.Add("All");
+        SubFolderOptions.Add(new SubFolderOption("All") { IsSelected = true });
         foreach (var label in _allEntries.Select(e => e.SubFolder).Where(s => !string.IsNullOrEmpty(s)).Distinct())
-            SubFolderOptions.Add(label);
+            SubFolderOptions.Add(new SubFolderOption(label));
 
         SelectedSubFolder = "All";
         FilterText = string.Empty;
@@ -61,14 +79,23 @@ public partial class ResourceSearchViewModel : ObservableObject
         SelectedEntry = null;
         PreviewImageSource = null;
         AudioFilePath = null;
+        ImageFilePath = null;
         AudioTypeLabel = string.Empty;
         MapResults.Clear();
         CommonResults.Clear();
+        TroopResults.Clear();
+        PluginCmdResults.Clear();
         StatusText = $"{_allEntries.Count} files — select one to search.";
     }
 
     partial void OnFilterTextChanged(string value) => RebuildList();
-    partial void OnSelectedSubFolderChanged(string value) => RebuildList();
+
+    partial void OnSelectedSubFolderChanged(string value)
+    {
+        foreach (var opt in SubFolderOptions)
+            opt.IsSelected = opt.Name == value;
+        RebuildList();
+    }
 
     partial void OnSelectedEntryChanged(ResourceEntry? value)
     {
@@ -78,12 +105,15 @@ public partial class ResourceSearchViewModel : ObservableObject
 
         PreviewImageSource = null;
         AudioFilePath = null;
+        ImageFilePath = null;
         AudioTypeLabel = string.Empty;
 
         if (value == null)
         {
             MapResults.Clear();
             CommonResults.Clear();
+            TroopResults.Clear();
+        PluginCmdResults.Clear();
             StatusText = $"{_allEntries.Count} files — select one to search.";
             return;
         }
@@ -93,7 +123,16 @@ public partial class ResourceSearchViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void SelectSubFolder(string folder) => SelectedSubFolder = folder;
+    private void SelectSubFolder(SubFolderOption option) => SelectedSubFolder = option.Name;
+
+    [RelayCommand]
+    private void OpenFile()
+    {
+        var path = ImageFilePath ?? AudioFilePath;
+        if (path == null) return;
+        try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true }); }
+        catch { }
+    }
 
     private void LoadPreview(ResourceEntry entry)
     {
@@ -108,11 +147,12 @@ public partial class ResourceSearchViewModel : ObservableObject
         if (_category == ResourceCategory.Audio)
         {
             AudioTypeLabel = found.Value.SubLabel;
-            AudioFilePath = found.Value.Path;
+            AudioFilePath  = found.Value.Path;
         }
         else
         {
             var path = found.Value.Path;
+            ImageFilePath = path;
             _ = System.Threading.Tasks.Task.Run(() =>
             {
                 try
@@ -142,18 +182,22 @@ public partial class ResourceSearchViewModel : ObservableObject
         {
             var db = _db;
             var category = _category;
-            var (mapR, commonR) = await System.Threading.Tasks.Task.Run(() =>
+            var (mapR, commonR, troopR, pluginR) = await System.Threading.Tasks.Task.Run(() =>
                 ResourceSearcher.Search(db, resourceName, category));
 
             MapResults.Clear();
             foreach (var r in mapR) MapResults.Add(r);
             CommonResults.Clear();
             foreach (var r in commonR) CommonResults.Add(r);
+            TroopResults.Clear();
+            PluginCmdResults.Clear();
+            foreach (var r in troopR) TroopResults.Add(r);
+            foreach (var r in pluginR) PluginCmdResults.Add(r);
 
-            int total = mapR.Count + commonR.Count;
+            int total = mapR.Count + commonR.Count + troopR.Count + pluginR.Count;
             StatusText = total == 0
                 ? $"No usages found for \"{resourceName}\"."
-                : $"{mapR.Count} map event(s)  |  {commonR.Count} common event(s)";
+                : $"{mapR.Count} map  |  {commonR.Count} common  |  {troopR.Count} battle  |  {pluginR.Count} plugin cmd(s)";
         }
         catch (Exception ex)
         {

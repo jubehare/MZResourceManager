@@ -35,12 +35,38 @@
                         BorderBrush="#D1D1D1"
                         BorderThickness="0,0,0,1">
                     <StackPanel>
-                        <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="6,4"
-                                 FontSize="12"
-                                 BorderBrush="#D1D1D1"
-                                 BorderThickness="1"
-                                 Margin="0,0,0,6"/>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="&#xE721;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="13" Foreground="#999999"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,7,0"/>
+                            <Grid Grid.Column="1">
+                                <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
+                                         Padding="6,4" FontSize="12"
+                                         BorderBrush="#D1D1D1" BorderThickness="1"/>
+                                <TextBlock Text="Search…"
+                                           IsHitTestVisible="False"
+                                           Foreground="#AAAAAA" FontSize="12"
+                                           Padding="8,5" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding FilterText}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                        </Grid>
 
                         <ItemsControl ItemsSource="{Binding SubFolderOptions}">
                             <ItemsControl.ItemsPanel>
@@ -50,7 +76,7 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Button Content="{Binding}"
+                                    <Button Content="{Binding Name}"
                                             Command="{Binding DataContext.SelectSubFolderCommand,
                                                       RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}"
@@ -60,12 +86,9 @@
                                             Cursor="Hand">
                                         <Button.Style>
                                             <Style TargetType="Button">
-                                                <Setter Property="Background"
-                                                        Value="#D1D1D1"/>
-                                                <Setter Property="Foreground"
-                                                        Value="#1A1A1A"/>
-                                                <Setter Property="BorderThickness"
-                                                        Value="0"/>
+                                                <Setter Property="Background" Value="#D1D1D1"/>
+                                                <Setter Property="Foreground" Value="#1A1A1A"/>
+                                                <Setter Property="BorderThickness" Value="0"/>
                                                 <Setter Property="Template">
                                                     <Setter.Value>
                                                         <ControlTemplate TargetType="Button">
@@ -77,18 +100,20 @@
                                                                                   VerticalAlignment="Center"/>
                                                             </Border>
                                                             <ControlTemplate.Triggers>
-                                                                <Trigger Property="IsMouseOver"
-                                                                         Value="True">
-                                                                    <Setter TargetName="Bd"
-                                                                            Property="Background"
-                                                                            Value="#0078D4"/>
-                                                                    <Setter Property="Foreground"
-                                                                            Value="White"/>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter TargetName="Bd" Property="Background" Value="#0078D4"/>
+                                                                    <Setter Property="Foreground" Value="White"/>
                                                                 </Trigger>
                                                             </ControlTemplate.Triggers>
                                                         </ControlTemplate>
                                                     </Setter.Value>
                                                 </Setter>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                        <Setter Property="Background" Value="#0078D4"/>
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
                                             </Style>
                                         </Button.Style>
                                     </Button>
@@ -107,20 +132,43 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel>
-                                <TextBlock Text="{Binding Name}"
-                                           FontSize="12"/>
+                                <!-- Name row + optional ENGINE badge -->
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Name}"
+                                               FontSize="12"
+                                               VerticalAlignment="Center"/>
+                                    <Border CornerRadius="2"
+                                            Padding="4,1"
+                                            Margin="6,0,0,0"
+                                            VerticalAlignment="Center"
+                                            Background="#6B7280"
+                                            ToolTip="Always loaded by the RPG Maker MZ engine — cannot be unused">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsReserved}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="ENGINE"
+                                                   FontSize="9"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"/>
+                                    </Border>
+                                </StackPanel>
+                                <!-- Sub-folder label -->
                                 <TextBlock Text="{Binding SubFolder}"
                                            FontSize="10"
                                            Foreground="#767676">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility"
-                                                    Value="Visible"/>
+                                            <Setter Property="Visibility" Value="Visible"/>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding SubFolder}"
-                                                             Value="">
-                                                    <Setter Property="Visibility"
-                                                            Value="Collapsed"/>
+                                                <DataTrigger Binding="{Binding SubFolder}" Value="">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -158,13 +206,43 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Text="{Binding SelectedEntry.Name}"
-                                   FontSize="13"
-                                   FontWeight="SemiBold"
-                                   Foreground="#1A1A1A"
-                                   Margin="0,0,0,8"/>
+                        <StackPanel Grid.Row="0"
+                                    Orientation="Horizontal"
+                                    Margin="0,0,0,8">
+                            <TextBlock Text="{Binding SelectedEntry.Name}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Foreground="#1A1A1A"
+                                       VerticalAlignment="Center"/>
+                            <Button Command="{Binding OpenFileCommand}"
+                                    Width="26" Height="26"
+                                    Margin="6,0,0,0"
+                                    Cursor="Hand"
+                                    ToolTip="Open file location">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bd"
+                                                Background="#EBEBEB"
+                                                CornerRadius="4">
+                                            <TextBlock Text="&#xE838;"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="12"
+                                                       Foreground="#555555"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="#D6D6D6"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </StackPanel>
 
                         <Image Grid.Row="1"
                                Source="{Binding PreviewImageSource}"
@@ -238,7 +316,8 @@
                 </TabControl.Resources>
 
                 <TabItem Header="Map Events">
-                    <DataGrid ItemsSource="{Binding MapResults}">
+                    <DataGrid ItemsSource="{Binding MapResults}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Map"
                                                 Binding="{Binding MapDisplay}"
@@ -251,13 +330,14 @@
                                                 Width="70"/>
                             <DataGridTextColumn Header="Detail"
                                                 Binding="{Binding Detail}"
-                                                Width="*"/>
+                                                Width="350"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </TabItem>
 
                 <TabItem Header="Common Events">
-                    <DataGrid ItemsSource="{Binding CommonResults}">
+                    <DataGrid ItemsSource="{Binding CommonResults}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="ID"
                                                 Binding="{Binding EventId, StringFormat=D3}"
@@ -267,7 +347,47 @@
                                                 Width="200"/>
                             <DataGridTextColumn Header="Detail"
                                                 Binding="{Binding Detail}"
-                                                Width="*"/>
+                                                Width="350"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+
+                <TabItem Header="Battle Events">
+                    <DataGrid ItemsSource="{Binding TroopResults}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Troop"
+                                                Binding="{Binding TroopDisplay}"
+                                                Width="200"/>
+                            <DataGridTextColumn Header="Page"
+                                                Binding="{Binding PageDisplay}"
+                                                Width="60"/>
+                            <DataGridTextColumn Header="Detail"
+                                                Binding="{Binding Detail}"
+                                                Width="350"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+
+                <TabItem Header="Plugin Commands">
+                    <DataGrid ItemsSource="{Binding PluginCmdResults}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Plugin"
+                                                Binding="{Binding PluginName}"
+                                                Width="180"/>
+                            <DataGridTextColumn Header="Command"
+                                                Binding="{Binding CommandName}"
+                                                Width="160"/>
+                            <DataGridTextColumn Header="Parameter"
+                                                Binding="{Binding ParamKey}"
+                                                Width="160"/>
+                            <DataGridTextColumn Header="Value"
+                                                Binding="{Binding ParamValue}"
+                                                Width="200"/>
+                            <DataGridTextColumn Header="Context"
+                                                Binding="{Binding Context}"
+                                                Width="350"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </TabItem>
